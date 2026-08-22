@@ -1,0 +1,23 @@
+__pycache__/
+*.py[cod]
+.venv/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.vscode/
+
+# pyinstaller: build/ is its scratch dir, but the spec is committed (docs 11).
+# must be build/* not build/ — git cannot re-include a file under an excluded dir.
+build/*
+!build/*.spec
+dist/
+
+# runtime output
+saves/
+crash_*.log
+balance.md
+
+# windows / onedrive
+Thumbs.db
+desktop.ini

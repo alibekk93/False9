@@ -1,0 +1,42 @@
+[project]
+name = "false-nine"
+description = "A career management game about a Russian footballer who never makes it."
+readme = "claude-context/README.md"
+requires-python = ">=3.12"
+dynamic = ["version"]
+dependencies = ["pygame-ce>=2.5"]
+
+[project.scripts]
+false-nine = "false_nine.main:main"
+
+[dependency-groups]
+dev = ["pytest>=8", "mypy>=1.11", "ruff>=0.6"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+path = "src/false_nine/__about__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/false_nine"]
+
+[tool.ruff]
+target-version = "py312"
+# ruff formats python blocks inside .md; the design docs are hand-aligned prose, not code.
+extend-exclude = ["*.md"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.ruff.lint.isort]
+required-imports = ["from __future__ import annotations"]
+
+# strict on core only, per CLAUDE.md. bare `uv run mypy` checks exactly this.
+[tool.mypy]
+files = ["src/false_nine/core"]
+strict = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
