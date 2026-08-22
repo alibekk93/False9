@@ -6,8 +6,9 @@ from false_nine.ui import theme
 
 
 class Screen:
-    def handle(self, event: pygame.event.Event) -> None:
-        pass
+    def handle(self, event: pygame.event.Event) -> bool:
+        """True if the screen consumed the event. Unconsumed Esc pops the stack."""
+        return False
 
     def draw(self, surface: pygame.Surface) -> None:
         pass
@@ -46,10 +47,11 @@ class App:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.running = False
-                elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-                    self.pop()
-                elif self.screens:
-                    self.screens[-1].handle(event)
+                    continue
+                consumed = self.screens[-1].handle(event) if self.screens else False
+                if not consumed and event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        self.pop()
 
             if self.screens:
                 self.screens[-1].draw(logical)

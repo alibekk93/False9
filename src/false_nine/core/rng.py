@@ -3,6 +3,10 @@ from __future__ import annotations
 import hashlib
 import random
 
+# `random` may only be imported here (tests/test_boundaries.py enforces it), so the
+# stream type is re-exported for modules that take one as an argument.
+Stream = random.Random
+
 
 class Rng:
     """Seeded randomness with named substreams.

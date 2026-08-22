@@ -35,12 +35,12 @@ Actions cost 1 AP each unless noted:
 
 | Action | Effect summary |
 |---|---|
-| Train (choose: technique / physical / mental) | `+ability`, `+fatigue`, injury risk |
-| Recover | `-fatigue`, `-stress`, small `+injury_heal` |
-| Work (side job) | `+money`, `+fatigue`, `-time for everything else` |
-| Socialise (choose NPC) | relationship deltas, `-stress` |
+| Train (choose: technique / physical / mental) | `+ability`, `+fatigue 12`, injury risk. Unavailable while injured. |
+| Recover | `-fatigue 25`, `-stress 6` [TUNE], `-0.5` weeks off an injury [TUNE] |
+| Work (side job) | `+money`, `+fatigue 8`, `-time for everything else` |
+| Socialise (choose NPC) | relationship deltas, `-stress 8` |
 | Deal With It | resolves a pending obligation: debt payment, bureaucracy, medical |
-| Drift | 0 AP, ends the week immediately. `+stress` if obligations pending. |
+| Drift | 0 AP, ends the week immediately. `+stress 5` [TUNE] if obligations pending. |
 
 ### 2.2 Fatigue (0–100)
 
@@ -84,20 +84,33 @@ Three visible stats, 1–100, displayed honestly at all times.
 
 `ability = 0.4*technique + 0.35*physical + 0.25*mental`
 
+Starting values at 16: `technique 30`, `physical 30`, `mental 20` [TUNE]. `stress` starts
+at 20 [TUNE]. Stats have a **floor of 1** and no ceiling; the floor exists so permanent
+injury damage cannot drive a stat negative, and is not a cap.
+
 ### 3.1 Training gain
 
 ```
 gain = base_gain * age_factor * fatigue_factor * facility_factor
-base_gain      = 1.6                                    [TUNE]
+base_gain      = 0.85                                   [TUNE]
 age_factor     = 1.4 if age<=19, 1.0 if <=24, 0.6 if <=28, 0.25 otherwise
 fatigue_factor = 1.0 if fatigue<50, 0.6 if <75, 0.25 otherwise
 facility_factor= club.facilities (0.5 – 1.2)
 ```
 Diminishing returns: multiply `gain` by `(1 - stat/100) ** 0.7`.
 
-**There is no cap on these stats.** A maximally optimised protagonist reaches roughly
-technique 78 / physical 74 / mental 70 by age 26 — good, not elite. This emerges from
-the curve, not from a clamp. Do not add a clamp. (See §7.)
+**There is no cap on these stats.** A maximally optimised protagonist reaches an ability
+around 75 by age 26 — good, not elite. This emerges from the curve, not from a clamp.
+Do not add a clamp. (See §7.)
+
+**"Maximally optimised" means** the player who trains as hard as the fatigue system
+permits and ignores money entirely — `tools.sim.train_max`, roughly 2.9 Train AP/week.
+He is the anchor because he is the fastest possible climber: if he lands in the 70s,
+nobody reaches the 90s. `base_gain` was calibrated against him (M1) and lands his median
+ability at 75, his 99th percentile at 78 across 200 seeds. A player who also works to
+live lands nearer 60. The spec's original guess of 1.6 put the anchor player at ~97;
+`base_gain` is the `[TUNE]` knob and the exponent is not, so `base_gain` moved.
+**Re-calibrate at M4**, when club wages free AP that currently has to go to Work.
 
 ### 3.2 Form (0–100)
 

@@ -100,6 +100,12 @@ The week's `Effect` list, rendered one line at a time at 90 ms intervals:
   Kostya      closeness         −5     (not contacted, 9 weeks)
 ```
 
+Ability stats carry one decimal here and in the status column — a week of training is
+worth about `+1.5`, and rounding it to a whole number would show `54 → 54  +0` on a week
+that did real work. Money, debt, and week counts stay whole.
+
+One row per field per reason: four training sessions on technique are one line, not four.
+
 Losses in `neg`, gains in `pos`, unchanged omitted. The relationship line with its
 parenthetical reason is the most important row on this screen — it is how neglect becomes
 visible before it becomes irreversible.

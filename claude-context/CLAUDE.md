@@ -41,6 +41,7 @@ uv run python -m tools.sim   # headless career simulation, see claude-context/10
 src/false_nine/
   core/            # pure simulation. NO pygame import. NO I/O. Deterministic.
     state.py       # GameState dataclass, the single source of truth
+    actions.py     # step(state, action, rng) -> StepResult. The core contract.
     rng.py         # seeded RNG, all randomness goes through this
     calendar.py    # weeks, seasons, phases
     resources.py   # time / energy / money

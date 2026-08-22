@@ -228,9 +228,13 @@ named computed property to `GameState` (e.g. `state.is_broke`) and reference tha
 ## 6. Strings
 
 `data/strings/ui.json` holds every piece of UI chrome — button labels, headers, tooltips,
-stat names, the words used to describe psyche states (`07` §4). Nothing player-visible is
-hardcoded in `ui/`, even though there is no localization. This is for editability, not
-translation.
+stat names, ledger reasons, the words used to describe psyche states (`07` §4). Nothing
+player-visible is hardcoded in `ui/`, even though there is no localization. This is for
+editability, not translation.
+
+This one file's `items` is an **object keyed by string id**, not the `items` array the
+other schemas use — a list of `{"id": …, "text": …}` pairs buys nothing here. A value is
+a string, or a list of strings for an ordered word table like `body_words`.
 
 ## 7. Authoring checklist
 

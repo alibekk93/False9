@@ -40,3 +40,5 @@ strict = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+# tools/ is dev-only and not part of the wheel; tests import its scripted AP policies.
+pythonpath = ["."]
