@@ -11,6 +11,9 @@ operation.
 ## 1. Calendar
 
 - Career runs seasons 1–16, ages 16–32 (`age = 15 + season`).
+  The formula is the rule: he is 16 in season 1 and **31 during season 16**, and turns 32
+  in the off-season resolution step after it, which is when §9 evaluates the endings.
+  The "16–32" and "26–32" ranges elsewhere in the docs are inclusive of that birthday.
 - Each season has **10 playable weeks** (`week` 1–10) plus an off-season resolution step.
 - `week_index = (season - 1) * 10 + week`, range 1–160.
 - Phase boundaries: Phase 1 = seasons 1–3, Phase 2 = seasons 4–10, Phase 3 = seasons 11–16.

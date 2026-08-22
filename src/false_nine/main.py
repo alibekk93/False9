@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from false_nine.__about__ import __version__
+from false_nine.ui.app import App
 
 
 def main() -> None:
-    print(f"false-nine {__version__}")
+    App().run()
