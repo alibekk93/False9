@@ -27,4 +27,6 @@ def load(payload: dict[str, Any]) -> GameState:
     snapshot = payload["state"]
     if payload.get("seed") != snapshot.get("seed"):
         raise ValueError("save seed does not match its state")
-    return GameState(**snapshot)
+    # JSON has no tuples, so a saved hand comes back as a list and would compare
+    # unequal to the state it was written from.
+    return GameState(**{**snapshot, "match_hand": tuple(snapshot["match_hand"])})

@@ -46,3 +46,38 @@ def draw(
 
 def height(role: str) -> int:
     return font(role).get_linesize()
+
+
+@cache
+def wrap(content: str, role: str, width: int) -> tuple[str, ...]:
+    """Greedy word wrap. Cached alongside `render`, since the paragraphs it wraps —
+    card flavour, the match report — are redrawn every frame they are on screen."""
+    measure = font(role)
+    lines: list[str] = []
+    line = ""
+    for word in content.split():
+        candidate = f"{line} {word}" if line else word
+        if line and measure.size(candidate)[0] > width:
+            lines.append(line)
+            line = word
+        else:
+            line = candidate
+    if line:
+        lines.append(line)
+    return tuple(lines)
+
+
+def draw_wrapped(
+    surface: pygame.Surface,
+    content: str,
+    pos: tuple[int, int],
+    width: int,
+    role: str = "body",
+    colour: str = theme.text_primary,
+) -> int:
+    """Returns the y the caller should carry on from."""
+    y = pos[1]
+    for line in wrap(content, role, width):
+        draw(surface, line, (pos[0], y), role, colour)
+        y += height(role)
+    return y

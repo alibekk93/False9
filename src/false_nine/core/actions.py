@@ -1,14 +1,19 @@
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass, replace
-from typing import Any
 
 from false_nine.core import calendar, resources, stats
+from false_nine.core.effects import Change, update
+from false_nine.core.match import play
+from false_nine.core.match.card import Card, Outcome
 from false_nine.core.rng import Rng
 from false_nine.core.state import GameState, advance_week
 
 TRAINABLE = ("technique", "physical", "mental")
-FREE_ACTIONS = frozenset({"drift", "end_week"})
+# A match costs no AP: 03 §2.1 lists six actions and playing is not one of them.
+FREE_ACTIONS = frozenset({"drift", "end_week", "start_match", "play_card"})
+BEATS_PER_MATCH = 3
 
 
 @dataclass(frozen=True)
@@ -20,28 +25,22 @@ class PlayerAction:
 
 
 @dataclass(frozen=True)
-class Change:
-    """One ledger row. `reason` is a key into data/strings/ui.json, never prose.
-
-    Deliberately narrower than the tagged union in 04: every effect M1 can produce is
-    "a named quantity moved from X to Y because Z". `CardResolved` and `EventFired`
-    have genuinely different shapes and arrive with the systems that emit them."""
-
-    field: str
-    before: float
-    after: float
-    reason: str
-
-
-@dataclass(frozen=True)
 class StepResult:
     state: GameState
     effects: list[Change]
+    # The outcome a played card resolved to, so the screen shows the roll that
+    # happened rather than one of its own. None for every other action.
+    outcome: Outcome | None = None
 
 
 def can_do(state: GameState, action: PlayerAction) -> bool:
     if action.kind == "end_week":
-        return state.ap == 0
+        # A match he is due to play blocks the week from ending, the way it would.
+        return state.ap == 0 and not state.match_pending
+    if action.kind == "start_match":
+        return state.match_pending and not state.in_match
+    if action.kind == "play_card":
+        return state.in_match and action.arg in state.match_hand
     if state.ap <= 0:
         return False
     if action.kind == "train":
@@ -51,13 +50,24 @@ def can_do(state: GameState, action: PlayerAction) -> bool:
     return action.kind in {"recover", "work", "socialise", "drift"}
 
 
-def step(state: GameState, action: PlayerAction, rng: Rng) -> StepResult:
+def step(
+    state: GameState, action: PlayerAction, rng: Rng, cards: Mapping[str, Card]
+) -> StepResult:
     if action.kind == "end_week":
         return end_week(state, rng) if can_do(state, action) else StepResult(state, [])
     if not can_do(state, action):
         return StepResult(state, [])
 
     effects: list[Change] = []
+    if action.kind == "start_match":
+        return StepResult(play.start(state, cards, rng), effects)
+    if action.kind == "play_card":
+        assert action.arg is not None  # can_do checked membership in the hand
+        state, outcome = play.play_card(state, cards, action.arg, rng, effects)
+        if state.beat > BEATS_PER_MATCH:
+            state = play.finish(state, rng, effects)
+        return StepResult(state, effects, outcome)
+
     if action.kind == "train":
         assert action.arg is not None  # can_do checked membership in TRAINABLE
         state = _train(state, action.arg, rng, effects)
@@ -79,20 +89,20 @@ def step(state: GameState, action: PlayerAction, rng: Rng) -> StepResult:
 def end_week(state: GameState, rng: Rng) -> StepResult:
     effects: list[Change] = []
 
-    state = _update(
+    state = update(
         state,
         effects,
         "reason_week_passed",
         fatigue=resources.clamp01_100(state.fatigue + resources.FATIGUE_PASSIVE),
         injury_weeks_left=max(0.0, state.injury_weeks_left - 1.0),
     )
-    state = _update(
+    state = update(
         state,
         effects,
         "reason_living_cost",
         money=state.money - resources.living_cost(state.phase),
     )
-    state = _update(
+    state = update(
         state,
         effects,
         "reason_debt_interest",
@@ -101,13 +111,13 @@ def end_week(state: GameState, rng: Rng) -> StepResult:
     if state.money < 0:
         # Only the debt row is worth a ledger line. Showing money dip negative and come
         # back to zero would read as an accounting glitch rather than as a shortfall.
-        state = _update(
+        state = update(
             state, effects, "reason_overdrawn", debt=state.debt - state.money
         )
         state = replace(state, money=0)
     if state.week == calendar.WEEKS_PER_SEASON:
         technique_loss, physical_loss = stats.season_decay(state.age)
-        state = _update(
+        state = update(
             state,
             effects,
             "reason_season_end",
@@ -119,36 +129,32 @@ def end_week(state: GameState, rng: Rng) -> StepResult:
     return StepResult(replace(state, ap=resources.ap_for_week(state)), effects)
 
 
+def _floored(stat: float) -> float:
+    """Ability has a floor, not a ceiling. See stats.STAT_FLOOR."""
+    return max(stats.STAT_FLOOR, stat)
+
+
 def _train(state: GameState, stat: str, rng: Rng, effects: list[Change]) -> GameState:
     gain = stats.training_gain(getattr(state, stat), state.age, state.fatigue)
-    state = _update(
+    state = update(
         state,
         effects,
         "reason_training",
         **{stat: getattr(state, stat) + gain},
         fatigue=resources.clamp01_100(state.fatigue + resources.FATIGUE_TRAIN),
     )
-
-    stream = rng.stream("injury", state.week_index)
-    risk = stats.p_injury(
-        stats.INJURY_BASE_TRAIN, state.fatigue, state.age, state.injury_history
-    )
-    if stream.random() >= risk:
-        return state
-
-    injury = stats.roll_injury(stream)
-    return _update(
+    return stats.maybe_injure(
         state,
+        stats.p_injury(
+            stats.INJURY_BASE_TRAIN, state.fatigue, state.age, state.injury_history
+        ),
+        rng.stream("injury", state.week_index),
         effects,
-        f"reason_injury_{injury.severity}",
-        injury_weeks_left=float(injury.weeks),
-        injury_history=state.injury_history + 1,
-        physical=_floored(state.physical - injury.physical_damage),
     )
 
 
 def _recover(state: GameState, effects: list[Change]) -> GameState:
-    return _update(
+    return update(
         state,
         effects,
         "reason_recover",
@@ -159,7 +165,7 @@ def _recover(state: GameState, effects: list[Change]) -> GameState:
 
 
 def _work(state: GameState, effects: list[Change]) -> GameState:
-    return _update(
+    return update(
         state,
         effects,
         "reason_work",
@@ -169,7 +175,7 @@ def _work(state: GameState, effects: list[Change]) -> GameState:
 
 
 def _socialise(state: GameState, effects: list[Change]) -> GameState:
-    return _update(
+    return update(
         state,
         effects,
         "reason_socialise",
@@ -179,7 +185,7 @@ def _socialise(state: GameState, effects: list[Change]) -> GameState:
 
 def _deal_with_it(state: GameState, effects: list[Change]) -> GameState:
     paid = min(state.money, state.debt)
-    return _update(
+    return update(
         state,
         effects,
         "reason_debt_payment",
@@ -190,7 +196,7 @@ def _deal_with_it(state: GameState, effects: list[Change]) -> GameState:
 
 def _drift(state: GameState, effects: list[Change]) -> GameState:
     if state.debt > 0:
-        state = _update(
+        state = update(
             state,
             effects,
             "reason_drift",
@@ -199,19 +205,3 @@ def _drift(state: GameState, effects: list[Change]) -> GameState:
             ),
         )
     return replace(state, ap=0)
-
-
-def _floored(stat: float) -> float:
-    """Ability has a floor, not a ceiling. See stats.STAT_FLOOR."""
-    return max(stats.STAT_FLOOR, stat)
-
-
-def _update(
-    state: GameState, effects: list[Change], reason: str, **values: Any
-) -> GameState:
-    """Set fields, recording a ledger row for each one that actually moved."""
-    for field, after in values.items():
-        before: float = getattr(state, field)
-        if before != after:
-            effects.append(Change(field, before, after, reason))
-    return replace(state, **values)

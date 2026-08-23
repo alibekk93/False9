@@ -2,7 +2,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from false_nine.core.effects import Change, update
 from false_nine.core.rng import Stream
+from false_nine.core.state import GameState
 
 # Calibrated against tools.sim.train_max — the player who trains as hard as the fatigue
 # system permits and ignores money entirely. He reaches a median ability of 75 at 26 and
@@ -83,3 +85,22 @@ def roll_injury(stream: Stream) -> Injury:
     if roll < 0.90:
         return Injury("moderate", stream.randint(3, 8), 2.0)
     return Injury("severe", stream.randint(12, 30), 6.0)
+
+
+def maybe_injure(
+    state: GameState, risk: float, stream: Stream, effects: list[Change]
+) -> GameState:
+    """One place for every injury roll — training, the match, and a dangerous card
+    moment — so the history count and the permanent damage can never diverge."""
+    if stream.random() >= risk:
+        return state
+    injury = roll_injury(stream)
+    return update(
+        state,
+        effects,
+        f"reason_injury_{injury.severity}",
+        injury_weeks_left=float(injury.weeks),
+        injury_history=state.injury_history + 1,
+        # Ability has a floor, not a ceiling. See STAT_FLOOR.
+        physical=max(STAT_FLOOR, state.physical - injury.physical_damage),
+    )

@@ -5,6 +5,7 @@ from dataclasses import replace
 
 import pytest
 
+from false_nine.content import cards
 from false_nine.core import stats
 from false_nine.core.actions import PlayerAction, step
 from false_nine.core.rng import Rng
@@ -56,17 +57,23 @@ def test_decay_starts_after_the_peak(age: int, expected: tuple[float, float]) ->
 
 
 def test_decay_applies_at_the_season_boundary() -> None:
-    # week_index 150 is season 15 week 10; he is 30.
+    # week_index 150 is season 15 week 10; he is 30. Week 10 is a match week, and the
+    # week will not end with one outstanding, so this one is already played.
     before = replace(
-        GameState(seed="t"), week_index=150, ap=0, technique=60.0, physical=60.0
+        GameState(seed="t"),
+        week_index=150,
+        ap=0,
+        technique=60.0,
+        physical=60.0,
+        last_match_week=150,
     )
-    after = step(before, PlayerAction("end_week"), RNG).state
+    after = step(before, PlayerAction("end_week"), RNG, {}).state
     assert (after.technique, after.physical) == (59.6, 58.8)
 
 
 def test_training_lifts_the_chosen_stat_only() -> None:
     before = GameState(seed="t")
-    after = step(before, PlayerAction("train", "technique"), RNG).state
+    after = step(before, PlayerAction("train", "technique"), RNG, {}).state
     assert after.technique > before.technique
     assert (after.physical, after.mental) == (before.physical, before.mental)
     assert after.fatigue == 12.0
@@ -77,7 +84,9 @@ def test_training_curve_shape() -> None:
     and ignores money entirely is in the 70s at 26 — never the 90s — and no line of
     code clamps him there. See 03 §3.1."""
     finals = [
-        run_career(f"curve{i}", train_max, until_week=AGE_26_WEEK).ability
+        run_career(
+            f"curve{i}", train_max, cards.load(), until_week=AGE_26_WEEK
+        ).final.ability
         for i in range(40)
     ]
     assert 70.0 <= statistics.median(finals) < 80.0

@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+from false_nine.content import cards
 from false_nine.core.actions import PlayerAction, step
 from false_nine.core.rng import Rng
 from false_nine.core.save import dump, load
 from false_nine.core.state import GameState
+from tools.sim import run_career, train_max
 
 ACTIONS = [
     PlayerAction("train", "technique"),
@@ -19,10 +21,18 @@ ACTIONS = [
 
 
 def replay(seed: str, actions: list[PlayerAction]) -> GameState:
+    """A week with a match will not end until it is played, so the fixed action list is
+    interleaved with the picks the hand actually offers."""
     rng = Rng(seed)
+    deck = cards.load()
     state = GameState(seed=seed)
     for action in actions * 12:
-        state = step(state, action, rng).state
+        if state.match_pending:
+            state = step(state, PlayerAction("start_match"), rng, deck).state
+            while state.in_match:
+                pick = PlayerAction("play_card", sorted(state.match_hand)[0])
+                state = step(state, pick, rng, deck).state
+        state = step(state, action, rng, deck).state
     return state
 
 
@@ -33,6 +43,18 @@ def test_replay_reproduces_state() -> None:
 def test_different_seeds_diverge() -> None:
     """Otherwise the test above would pass on a game that ignores its RNG entirely."""
     assert replay("8f2c", ACTIONS) != replay("other", ACTIONS)
+
+
+def test_the_replay_actually_played_matches() -> None:
+    """Guards the guard: if matches stopped firing, the test above still passes."""
+    assert replay("8f2c", ACTIONS).last_match_week > 0
+
+
+def test_a_full_career_is_reproducible() -> None:
+    a = run_career("full", train_max, cards.load())
+    b = run_career("full", train_max, cards.load())
+    assert a.final == b.final
+    assert a.ratings == b.ratings
 
 
 def test_save_roundtrip_after_a_played_career() -> None:

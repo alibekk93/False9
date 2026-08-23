@@ -1,0 +1,144 @@
+{
+  "schema": "card",
+  "items": [
+    {
+      "id": "card_hide",
+      "title": "Hide",
+      "pool": "pool_anxious",
+      "weight_source": null,
+      "beat_tags": ["early", "middle", "late"],
+      "flavour": "You find the one place on the pitch where nobody can give you the ball.",
+      "outcomes": [
+        {
+          "weight": 65,
+          "rating_delta": -0.8,
+          "momentum": -1,
+          "text": "Two moves go down the other side without you. Nobody mentions it."
+        },
+        {
+          "weight": 35,
+          "rating_delta": -0.4,
+          "momentum": 0,
+          "text": "Vitya finds you anyway and you give it straight back to him."
+        }
+      ]
+    },
+    {
+      "id": "card_rushed_pass",
+      "title": "Rushed pass",
+      "pool": "pool_anxious",
+      "weight_source": null,
+      "beat_tags": ["early", "middle", "late"],
+      "flavour": "You play it before you have to, because having it is worse.",
+      "outcomes": [
+        {
+          "weight": 60,
+          "rating_delta": -0.9,
+          "momentum": -1,
+          "text": "It goes to nobody. Their full-back does not even have to move to collect it."
+        },
+        {
+          "weight": 40,
+          "rating_delta": -0.3,
+          "momentum": 0,
+          "text": "It reaches Kotov, who has to take it going backwards, and says something you do not catch."
+        }
+      ]
+    },
+    {
+      "id": "card_safe_backpass",
+      "title": "Safe backpass",
+      "pool": "pool_anxious",
+      "weight_source": null,
+      "beat_tags": ["middle", "late"],
+      "flavour": "There is a forward pass. There is also a backward one.",
+      "outcomes": [
+        {
+          "weight": 70,
+          "rating_delta": -0.6,
+          "momentum": -1,
+          "text": "You go backwards. A man in the third row explains to his son what you should have done."
+        },
+        {
+          "weight": 30,
+          "rating_delta": -0.2,
+          "momentum": 0,
+          "text": "You go backwards and the move builds again anyway. It costs the team nothing and you know it cost something."
+        }
+      ]
+    },
+    {
+      "id": "card_heavy_legs",
+      "title": "Heavy legs",
+      "pool": "pool_tired",
+      "weight_source": null,
+      "beat_tags": ["middle", "late"],
+      "flavour": "The run is there. The legs are on the bus from Thursday.",
+      "outcomes": [
+        {
+          "weight": 60,
+          "rating_delta": -0.9,
+          "momentum": -1,
+          "fatigue": 4,
+          "text": "You start the run and stop it halfway. The pass goes where you were going to be."
+        },
+        {
+          "weight": 40,
+          "rating_delta": -0.4,
+          "momentum": 0,
+          "fatigue": 5,
+          "text": "You make the run and arrive a stride late. A stride is the whole thing."
+        }
+      ]
+    },
+    {
+      "id": "card_hospital_ball",
+      "title": "Hospital ball",
+      "pool": "pool_tired",
+      "weight_source": null,
+      "beat_tags": ["middle", "late"],
+      "flavour": "The pass is a second late and half a yard short.",
+      "outcomes": [
+        {
+          "weight": 60,
+          "rating_delta": -0.8,
+          "momentum": -1,
+          "fatigue": 4,
+          "text": "Kotov takes the hit that was meant for you and does not look up."
+        },
+        {
+          "weight": 40,
+          "rating_delta": -0.3,
+          "momentum": 0,
+          "fatigue": 4,
+          "text": "It skips off the surface and out. Nobody says anything."
+        }
+      ]
+    },
+    {
+      "id": "card_late_in_the_tackle",
+      "title": "In late",
+      "pool": "pool_tired",
+      "weight_source": null,
+      "beat_tags": ["early", "middle", "late"],
+      "flavour": "You have decided to go and your legs have not agreed to the timing.",
+      "outcomes": [
+        {
+          "weight": 45,
+          "rating_delta": -0.7,
+          "momentum": -1,
+          "fatigue": 3,
+          "injury_roll": 0.08,
+          "text": "You get the man and a bit of the ground. Something in the knee registers it and files a complaint."
+        },
+        {
+          "weight": 55,
+          "rating_delta": -0.4,
+          "momentum": 0,
+          "fatigue": 3,
+          "text": "You get the man. The referee lets it go and their bench does not."
+        }
+      ]
+    }
+  ]
+}

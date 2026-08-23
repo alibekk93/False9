@@ -1,0 +1,119 @@
+{
+  "schema": "card",
+  "items": [
+    {
+      "id": "card_square_ball",
+      "title": "Square ball",
+      "pool": "pool_neutral",
+      "weight_source": null,
+      "beat_tags": ["early", "middle", "late"],
+      "flavour": "Kotov is five metres away and facing the right direction.",
+      "outcomes": [
+        {
+          "weight": 70,
+          "rating_delta": 0.1,
+          "momentum": 0,
+          "text": "He takes it and gives it back. The game goes on being the game."
+        },
+        {
+          "weight": 30,
+          "rating_delta": -0.2,
+          "momentum": 0,
+          "text": "It is slightly behind him. He gets it under control and looks at you for a second."
+        }
+      ]
+    },
+    {
+      "id": "card_reset_the_move",
+      "title": "Reset the move",
+      "pool": "pool_neutral",
+      "weight_source": null,
+      "beat_tags": ["early", "middle", "late"],
+      "flavour": "Everything forward is closed and the goalkeeper is calling for it.",
+      "outcomes": [
+        {
+          "weight": 65,
+          "rating_delta": 0.0,
+          "momentum": 0,
+          "text": "You put it back to him. He kicks it long anyway."
+        },
+        {
+          "weight": 35,
+          "rating_delta": 0.2,
+          "momentum": 0,
+          "text": "You put it back and go again from the other side. It buys twenty seconds and a bit of air."
+        }
+      ]
+    },
+    {
+      "id": "card_chase_the_lost_cause",
+      "title": "Chase the lost cause",
+      "pool": "pool_neutral",
+      "weight_source": null,
+      "beat_tags": ["early", "middle", "late"],
+      "flavour": "It is going out for a goal kick and everybody knows it.",
+      "outcomes": [
+        {
+          "weight": 55,
+          "rating_delta": 0.1,
+          "momentum": 0,
+          "fatigue": 4,
+          "text": "You chase it anyway. The near side of the ground makes a small approving noise."
+        },
+        {
+          "weight": 45,
+          "rating_delta": -0.1,
+          "momentum": 0,
+          "fatigue": 5,
+          "text": "You chase it anyway. It goes out. You walk back with your hands on your hips."
+        }
+      ]
+    },
+    {
+      "id": "card_free_kick_routine",
+      "title": "The routine off the training ground",
+      "pool": "pool_neutral",
+      "weight_source": null,
+      "beat_tags": ["middle", "late"],
+      "flavour": "You have done this one nine times in the week and once it worked.",
+      "outcomes": [
+        {
+          "weight": 25,
+          "rating_delta": 0.6,
+          "momentum": 1,
+          "text": "It works. Nobody looks more surprised than the man who designed it."
+        },
+        {
+          "weight": 75,
+          "rating_delta": -0.1,
+          "momentum": 0,
+          "text": "The first ball is cut out. Everyone jogs back to their positions without comment."
+        }
+      ]
+    },
+    {
+      "id": "card_stoppage",
+      "title": "The long stoppage",
+      "pool": "pool_neutral",
+      "weight_source": null,
+      "beat_tags": ["early", "middle", "late"],
+      "flavour": "Their keeper is down and the physio is walking, not running.",
+      "outcomes": [
+        {
+          "weight": 60,
+          "rating_delta": 0.0,
+          "momentum": 0,
+          "fatigue": -2,
+          "text": "Three minutes standing on the halfway line. Your breathing comes back. So does theirs."
+        },
+        {
+          "weight": 40,
+          "rating_delta": -0.2,
+          "momentum": -1,
+          "fatigue": -2,
+          "text": "Three minutes standing on the halfway line. Whatever the team had going is gone by the restart."
+        }
+      ]
+    }
+  ]
+}

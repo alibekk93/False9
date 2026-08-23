@@ -49,17 +49,17 @@ def test_injury_blocks_training_but_not_recovery() -> None:
     hurt = state(injury_weeks_left=3.0)
     assert not can_do(hurt, PlayerAction("train", "technique"))
     assert can_do(hurt, PlayerAction("recover"))
-    assert step(hurt, PlayerAction("train", "technique"), Rng("t")).state == hurt
+    assert step(hurt, PlayerAction("train", "technique"), Rng("t"), {}).state == hurt
 
 
 def test_recovery_speeds_healing_and_the_week_does_the_rest() -> None:
     healing = step(
-        state(injury_weeks_left=4.0), PlayerAction("recover"), Rng("t")
+        state(injury_weeks_left=4.0), PlayerAction("recover"), Rng("t"), {}
     ).state
     assert healing.injury_weeks_left == 3.5
 
     passed = step(
-        state(ap=0, injury_weeks_left=1.0), PlayerAction("end_week"), Rng("t")
+        state(ap=0, injury_weeks_left=1.0), PlayerAction("end_week"), Rng("t"), {}
     )
     assert passed.state.injury_weeks_left == 0.0
     assert not passed.state.is_injured
@@ -70,7 +70,7 @@ def test_injury_costs_physical_permanently() -> None:
     rng = Rng("hurt")
     current = state(fatigue=95.0, physical=60.0)
     for _ in range(400):
-        result = step(current, PlayerAction("train", "physical"), rng)
+        result = step(current, PlayerAction("train", "physical"), rng, {})
         damage = [
             e for e in result.effects if e.field == "physical" and e.after < e.before
         ]

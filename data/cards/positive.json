@@ -1,0 +1,303 @@
+{
+  "schema": "card",
+  "items": [
+    {
+      "id": "card_drop_into_the_hole",
+      "title": "Drop into the hole",
+      "pool": "pool_positive",
+      "weight_source": "technique",
+      "beat_tags": ["early", "middle", "late"],
+      "flavour": "The space between their lines is wide enough to stand in.",
+      "outcomes": [
+        {
+          "weight": 55,
+          "rating_delta": 1.0,
+          "momentum": 1,
+          "text": "You take it on the half-turn and the whole shape moves with you. Their six looks at their eight."
+        },
+        {
+          "weight": 35,
+          "rating_delta": 0.4,
+          "momentum": 0,
+          "text": "It works twice and then their six starts following you. Fine. That is a job for someone."
+        },
+        {
+          "weight": 10,
+          "rating_delta": -0.2,
+          "momentum": 0,
+          "text": "Nobody plays the pass. You stand in the space alone and go back to where you were."
+        }
+      ]
+    },
+    {
+      "id": "card_first_touch_away",
+      "title": "First touch away from the man",
+      "pool": "pool_positive",
+      "weight_source": "technique",
+      "beat_tags": ["early", "middle", "late"],
+      "flavour": "The ball arrives with a defender's breath already on your shoulder.",
+      "outcomes": [
+        {
+          "weight": 60,
+          "rating_delta": 0.9,
+          "momentum": 1,
+          "text": "One touch and he is behind you. The bench makes a noise it does not make often."
+        },
+        {
+          "weight": 40,
+          "rating_delta": 0.3,
+          "momentum": 0,
+          "text": "You get it under control and lay it back. Unremarkable, and correct."
+        }
+      ]
+    },
+    {
+      "id": "card_disguised_pass",
+      "title": "Disguised pass",
+      "pool": "pool_positive",
+      "weight_source": "technique",
+      "beat_tags": ["middle", "late"],
+      "flavour": "Everyone in the ground expects it to go right.",
+      "outcomes": [
+        {
+          "weight": 45,
+          "rating_delta": 1.2,
+          "momentum": 1,
+          "text": "It goes left. Sivakov is through and the linesman's flag stays down."
+        },
+        {
+          "weight": 40,
+          "rating_delta": 0.2,
+          "momentum": 0,
+          "text": "It goes left into a shin. The idea was better than the execution."
+        },
+        {
+          "weight": 15,
+          "rating_delta": -0.5,
+          "momentum": -1,
+          "text": "It goes left and straight to their full-back, who has time to look up. You track back."
+        }
+      ]
+    },
+    {
+      "id": "card_take_it_on_the_volley",
+      "title": "Take it on the volley",
+      "pool": "pool_positive",
+      "weight_source": "technique",
+      "beat_tags": ["late"],
+      "flavour": "The clearance drops out of the floodlights at knee height.",
+      "outcomes": [
+        {
+          "weight": 30,
+          "rating_delta": 1.2,
+          "momentum": 1,
+          "text": "The contact is clean and the noise from the stand arrives a moment after the ball does."
+        },
+        {
+          "weight": 45,
+          "rating_delta": 0.5,
+          "momentum": 0,
+          "text": "It is over the bar, but not by much, and a man behind the goal applauds anyway."
+        },
+        {
+          "weight": 25,
+          "rating_delta": -0.4,
+          "momentum": 0,
+          "text": "You catch it with the shin. It goes for a throw near the corner flag."
+        }
+      ]
+    },
+    {
+      "id": "card_hold_it_up",
+      "title": "Hold it up",
+      "pool": "pool_positive",
+      "weight_source": "physical",
+      "beat_tags": ["early", "middle", "late"],
+      "flavour": "The centre-half is already leaning on you when the ball is still in the air.",
+      "outcomes": [
+        {
+          "weight": 55,
+          "rating_delta": 0.9,
+          "momentum": 1,
+          "fatigue": 2,
+          "text": "You hold him off long enough. Kotov arrives late and takes it off your heel."
+        },
+        {
+          "weight": 45,
+          "rating_delta": 0.2,
+          "momentum": 0,
+          "fatigue": 3,
+          "text": "You keep it for four seconds and win a free kick you did not really win."
+        }
+      ]
+    },
+    {
+      "id": "card_run_the_channel",
+      "title": "Run the channel",
+      "pool": "pool_positive",
+      "weight_source": "physical",
+      "beat_tags": ["early", "middle"],
+      "flavour": "The gap between their full-back and the centre-half opens every time the ball turns over.",
+      "outcomes": [
+        {
+          "weight": 50,
+          "rating_delta": 0.8,
+          "momentum": 1,
+          "fatigue": 4,
+          "text": "You get there first and win the corner. Your calves tell you about it on the walk back."
+        },
+        {
+          "weight": 50,
+          "rating_delta": 0.3,
+          "momentum": 0,
+          "fatigue": 5,
+          "text": "You make the run four times. The pass comes once. That is the arrangement."
+        }
+      ]
+    },
+    {
+      "id": "card_win_the_second_ball",
+      "title": "Win the second ball",
+      "pool": "pool_positive",
+      "weight_source": "physical",
+      "beat_tags": ["early", "middle", "late"],
+      "flavour": "Nobody has controlled anything for a minute and a half.",
+      "outcomes": [
+        {
+          "weight": 60,
+          "rating_delta": 0.7,
+          "momentum": 1,
+          "fatigue": 3,
+          "text": "You get a foot in and it breaks to Vitya, who does something sensible with it."
+        },
+        {
+          "weight": 30,
+          "rating_delta": 0.1,
+          "momentum": 0,
+          "fatigue": 3,
+          "text": "You get there at the same time as their eight. It goes out off both of you."
+        },
+        {
+          "weight": 10,
+          "rating_delta": -0.6,
+          "momentum": -1,
+          "fatigue": 3,
+          "injury_roll": 0.05,
+          "text": "You get there half a second late and take his studs on the ankle. The referee gives it the other way."
+        }
+      ]
+    },
+    {
+      "id": "card_press_the_centre_half",
+      "title": "Press the centre-half",
+      "pool": "pool_positive",
+      "weight_source": "physical",
+      "beat_tags": ["early", "middle"],
+      "flavour": "He has taken two touches and not looked up once.",
+      "outcomes": [
+        {
+          "weight": 45,
+          "rating_delta": 0.9,
+          "momentum": 1,
+          "fatigue": 5,
+          "text": "He panics it into touch. The bench shouts the thing they always shout, ten seconds too late."
+        },
+        {
+          "weight": 55,
+          "rating_delta": 0.2,
+          "momentum": 0,
+          "fatigue": 6,
+          "text": "He goes round you. Nobody came with you, which you already knew."
+        }
+      ]
+    },
+    {
+      "id": "card_see_it_early",
+      "title": "See it early",
+      "pool": "pool_positive",
+      "weight_source": "mental",
+      "beat_tags": ["early", "middle", "late"],
+      "flavour": "Their left-back has stepped up too far again.",
+      "outcomes": [
+        {
+          "weight": 55,
+          "rating_delta": 1.0,
+          "momentum": 1,
+          "text": "You point and Sivakov goes. It is the pass of the half and it came from your head, not your foot."
+        },
+        {
+          "weight": 45,
+          "rating_delta": 0.3,
+          "momentum": 0,
+          "text": "You point. Nobody goes. You file it away for the second half."
+        }
+      ]
+    },
+    {
+      "id": "card_take_the_yellow_card",
+      "title": "Take the booking",
+      "pool": "pool_positive",
+      "weight_source": "mental",
+      "beat_tags": ["middle", "late"],
+      "flavour": "Their eight is away and there is nobody behind you.",
+      "outcomes": [
+        {
+          "weight": 70,
+          "rating_delta": 0.6,
+          "momentum": 0,
+          "text": "You take him down at the halfway line and hold your hand up before the whistle goes. The coach nods."
+        },
+        {
+          "weight": 30,
+          "rating_delta": -0.3,
+          "momentum": -1,
+          "text": "You take him down and the referee talks to you for a long time about what kind of player you are."
+        }
+      ]
+    },
+    {
+      "id": "card_talk_the_line_up",
+      "title": "Talk the line up",
+      "pool": "pool_positive",
+      "weight_source": "mental",
+      "beat_tags": ["early", "middle"],
+      "flavour": "The back four have dropped ten metres deeper than the coach wants.",
+      "outcomes": [
+        {
+          "weight": 50,
+          "rating_delta": 0.7,
+          "momentum": 1,
+          "text": "They come up. The next ball forward is a throw-in in their half instead of a corner in yours."
+        },
+        {
+          "weight": 50,
+          "rating_delta": 0.2,
+          "momentum": 0,
+          "text": "Two of them come up. The other two do not hear you, or do not want to."
+        }
+      ]
+    },
+    {
+      "id": "card_wait_for_the_gap",
+      "title": "Wait for the gap",
+      "pool": "pool_positive",
+      "weight_source": "mental",
+      "beat_tags": ["middle", "late"],
+      "flavour": "There is nothing on and the crowd wants something to happen.",
+      "outcomes": [
+        {
+          "weight": 60,
+          "rating_delta": 0.8,
+          "momentum": 1,
+          "text": "You hold it, and hold it, and then it opens. Somebody behind the dugout stops shouting mid-word."
+        },
+        {
+          "weight": 40,
+          "rating_delta": -0.2,
+          "momentum": 0,
+          "text": "You hold it too long and get shut down. The shouting behind the dugout resumes."
+        }
+      ]
+    }
+  ]
+}

@@ -106,10 +106,15 @@ Do not add a clamp. (See §7.)
 **"Maximally optimised" means** the player who trains as hard as the fatigue system
 permits and ignores money entirely — `tools.sim.train_max`, roughly 2.9 Train AP/week.
 He is the anchor because he is the fastest possible climber: if he lands in the 70s,
-nobody reaches the 90s. `base_gain` was calibrated against him (M1) and lands his median
-ability at 75, his 99th percentile at 78 across 200 seeds. A player who also works to
-live lands nearer 60. The spec's original guess of 1.6 put the anchor player at ~97;
-`base_gain` is the `[TUNE]` knob and the exponent is not, so `base_gain` moved.
+nobody reaches the 90s. `base_gain` was calibrated against him (M1) and the spec's
+original guess of 1.6 put him at ~97; `base_gain` is the `[TUNE]` knob and the exponent
+is not, so `base_gain` moved.
+
+Measured at M2, with matches in the loop, across 1000 seeds: **median ability 70.5 at
+26, 99th percentile 76.1**. Matches cost `+6` fatigue about seven times a season, so
+the anchor spends more AP on Recover than he did at M1, when the same policy reached a
+median of 75. `base_gain` did **not** move for this — the M2 band is 68–78 and 70.5 sits
+inside it. A player who also works to live lands nearer 53.
 **Re-calibrate at M4**, when club wages free AP that currently has to go to Work.
 
 ### 3.2 Form (0–100)

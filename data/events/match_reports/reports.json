@@ -1,0 +1,45 @@
+{
+  "schema": "match_report",
+  "items": [
+    {
+      "id": "mr_poor_01",
+      "band": "poor",
+      "text": "You come off before the end and the number goes up on the board without any noise around it. In the tunnel the assistant says the pitch was heavy. It was heavy for everyone. You sit with your boots on for longer than you need to. Somebody has left a bag of ice on the bench and it has gone soft. On the way out a steward holds the door and says nothing about the game, which is the kindest thing available."
+    },
+    {
+      "id": "mr_poor_02",
+      "band": "poor",
+      "text": "Nothing sticks. The ball comes to you at the wrong height four times and you make it look like the height's fault. Their eight stops following you into the space around the hour, because there is no longer any reason to. At the whistle the coach shakes hands down the line and gets to you and keeps going. The shower is cold on the far wall. You take the near one. On the bus somebody puts a film on and you watch the window instead."
+    },
+    {
+      "id": "mr_flat_01",
+      "band": "flat",
+      "text": "A game that finishes and leaves nothing behind. You do the running. Two passes come off, one does not, and the rest are the kind nobody counts. Your shirt is wet through by the hour and that is most of what you have to show. The coach's team talk is about the shape and not about anyone in particular. Outside, the car park has emptied faster than usual. You wait for Vitya by the gate and he takes a while."
+    },
+    {
+      "id": "mr_flat_02",
+      "band": "flat",
+      "text": "Steady, and steady is a word people use when there is nothing else. You are where you are supposed to be for ninety minutes. Once, in the second half, you take it on the turn and the ground makes a sound, and then the move ends in a throw. The physio asks about the ankle out of habit. It is fine. Somebody's father is waiting in the corridor with a programme, for one of the young ones."
+    },
+    {
+      "id": "mr_decent_01",
+      "band": "decent",
+      "text": "A good hour and then a normal half hour, which is how most of them go. You find the space between their lines early and keep finding it until they move somebody. When they move somebody, that is its own kind of compliment and nobody in the ground says it out loud. The coach mentions you in the room, briefly, before moving on to the corners. Vitya knocks his shoulder into yours on the way to the bus."
+    },
+    {
+      "id": "mr_decent_02",
+      "band": "decent",
+      "text": "You play well enough that the man doing the announcements gets your name right the second time. Two of the three things you try come off. Their centre-half spends the last twenty minutes standing closer to you than to anyone else, which slows you down and opens something for Sivakov. Afterwards the coach says the word solid, and means it, and it is not the word you wanted. In the car park somebody's kid asks for the shirt."
+    },
+    {
+      "id": "mr_good_01",
+      "band": "good",
+      "text": "One of the ones you will remember in detail for a few weeks and then in outline. Everything arrives at the right height. You take it on the half-turn in the first minute and they never quite fix it. Their bench is shouting instructions about you specifically by the half hour. The ground is not full, and the part of it behind the dugout is loud anyway. Ilya Nikolaevich waits by the tunnel and does not say much, which from him is a lot."
+    },
+    {
+      "id": "mr_good_02",
+      "band": "good",
+      "text": "The game runs through you and keeps running through you. Three times you see it before anyone else and twice somebody goes. In the second half you hold the ball for four seconds under pressure and the whole thing settles because of it. A man in a coat stands up in the little stand and stays standing. Afterwards there is a scout's name mentioned in the corridor and then not mentioned again. You eat on the bus and sleep the whole way."
+    }
+  ]
+}

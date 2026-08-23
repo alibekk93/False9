@@ -4,13 +4,22 @@ from dataclasses import dataclass
 
 import pygame
 
+from false_nine.content import cards as card_content
 from false_nine.content import strings
-from false_nine.core.actions import TRAINABLE, Change, PlayerAction, can_do, step
+from false_nine.core.actions import (
+    TRAINABLE,
+    Change,
+    PlayerAction,
+    StepResult,
+    can_do,
+    step,
+)
 from false_nine.core.rng import Rng
 from false_nine.core.state import GameState
 from false_nine.ui import text, theme
 from false_nine.ui.app import App, Screen
 from false_nine.ui.screens.ledger import LedgerScreen
+from false_nine.ui.screens.match import MatchScreen
 
 COL_STATUS = 64
 COL_WEEK = 476
@@ -32,6 +41,7 @@ class WeekScreen(Screen):
         self.app = app
         self.state = state
         self.rng = Rng(state.seed)
+        self.cards = card_content.load()
         self.week_effects: list[Change] = []
         self.selection = 0
         self.expanded = False
@@ -64,17 +74,26 @@ class WeekScreen(Screen):
         if not can_do(self.state, row.action):
             return
 
-        self._apply(row.action)
+        week = self.state.week_index
+        self.apply(row.action)
+        if row.action.kind == "start_match":
+            self.app.push(MatchScreen(self.app, self))
+            return
         if row.action.kind == "drift":
-            self._apply(PlayerAction("end_week"))
-        if row.action.kind in ("drift", "end_week"):
+            # Drift ends the week, but not before a match he is still due to play.
+            self.apply(PlayerAction("end_week"))
+        # Whether the week turned over, not whether it was asked to: Drift with a
+        # match outstanding leaves him at 0 AP with the match still to play.
+        if self.state.week_index != week:
             self._end_week()
         self.selection = min(self.selection, len(self._rows()) - 1)
 
-    def _apply(self, action: PlayerAction) -> None:
-        result = step(self.state, action, self.rng)
+    def apply(self, action: PlayerAction) -> StepResult:
+        """MatchScreen calls this too, so every change reaches one ledger."""
+        result = step(self.state, action, self.rng, self.cards)
         self.state = result.state
         self.week_effects.extend(result.effects)
+        return result
 
     def _end_week(self) -> None:
         self.expanded = False
@@ -94,6 +113,8 @@ class WeekScreen(Screen):
                 Row(f"arg_{stat}", PlayerAction("train", stat), 1) for stat in TRAINABLE
             ]
         rows += [Row(f"act_{kind}", PlayerAction(kind), 0) for kind in ACTIONS]
+        if self.state.match_pending:
+            rows.append(Row("act_start_match", PlayerAction("start_match"), 0))
         rows.append(Row("act_end_week", PlayerAction("end_week"), 0))
         return rows
 
@@ -141,6 +162,9 @@ class WeekScreen(Screen):
             y += ROW
 
         y += 16
+        # 07: form is exact, like every other number. Only the body is a word.
+        self._field(surface, y, "label_form", f"{state.form:.1f}")
+        y += ROW + 16
         self._field(surface, y, "label_body", body_word(state))
         y += ROW + 16
         self._field(surface, y, "label_money", f"{state.money:,}")
