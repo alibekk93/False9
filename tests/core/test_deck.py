@@ -42,11 +42,13 @@ def test_quality_clamps_at_both_ends() -> None:
 
 
 def test_quality_moves_the_way_the_spec_says() -> None:
-    base = deck.quality(50.0, 50.0, 20.0, 20.0)
-    assert deck.quality(70.0, 50.0, 20.0, 20.0) > base  # ability helps
-    assert deck.quality(50.0, 70.0, 20.0, 20.0) > base  # form helps
-    assert deck.quality(50.0, 50.0, 60.0, 20.0) < base  # fatigue hurts
-    assert deck.quality(50.0, 50.0, 20.0, 60.0) < base  # stress hurts
+    base = deck.quality(50.0, 50.0, 20.0, 20.0, 10.0, 75.0)
+    assert deck.quality(70.0, 50.0, 20.0, 20.0, 10.0, 75.0) > base  # ability helps
+    assert deck.quality(50.0, 70.0, 20.0, 20.0, 10.0, 75.0) > base  # form helps
+    assert deck.quality(50.0, 50.0, 60.0, 20.0, 10.0, 75.0) < base  # fatigue hurts
+    assert deck.quality(50.0, 50.0, 20.0, 60.0, 10.0, 75.0) < base  # stress hurts
+    assert deck.quality(50.0, 50.0, 20.0, 20.0, 50.0, 75.0) < base  # cynicism hurts
+    assert deck.quality(50.0, 50.0, 20.0, 20.0, 10.0, 40.0) < base  # hope helps
 
 
 def test_deck_is_twenty_cards_split_by_quality() -> None:
@@ -54,7 +56,14 @@ def test_deck_is_twenty_cards_split_by_quality() -> None:
     built = deck.build(state, CARDS, STREAM)
     expected = round(
         deck.POSITIVE_SLOTS_AT_FULL_QUALITY
-        * deck.quality(state.ability, state.form, state.fatigue, state.stress)
+        * deck.quality(
+            state.ability,
+            state.form,
+            state.fatigue,
+            state.stress,
+            state.cynicism,
+            state.hope,
+        )
     )
     positives = sum(1 for c in built if CARDS[c].pool == "pool_positive")
     assert len(built) == deck.DECK_SIZE

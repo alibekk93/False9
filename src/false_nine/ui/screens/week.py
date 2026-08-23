@@ -5,7 +5,9 @@ from dataclasses import dataclass
 import pygame
 
 from false_nine.content import cards as card_content
+from false_nine.content import npcs as npc_content
 from false_nine.content import strings
+from false_nine.core import psyche, relationships
 from false_nine.core.actions import (
     TRAINABLE,
     Change,
@@ -23,15 +25,22 @@ from false_nine.ui.screens.match import MatchScreen
 
 COL_STATUS = 64
 COL_WEEK = 476
+COL_PEOPLE = 888
 TOP = 64
 ROW = 32
 
 ACTIONS = ("recover", "work", "socialise", "deal_with_it", "drift")
+SUBMENU_ROOTS = ("train", "socialise")
+DRIFT_DOT_WEEKS = 5  # one dot per this many weeks of silence, four dots maximum
+MAX_DRIFT_DOTS = 4
 
 
 @dataclass(frozen=True)
 class Row:
-    label_key: str
+    """The label is resolved here rather than kept as a key, because an NPC's name
+    comes from `data/npcs` and every other label comes from `data/strings`."""
+
+    label: str
     action: PlayerAction
     indent: int
 
@@ -42,9 +51,10 @@ class WeekScreen(Screen):
         self.state = state
         self.rng = Rng(state.seed)
         self.cards = card_content.load()
+        self.npcs = npc_content.load()
         self.week_effects: list[Change] = []
         self.selection = 0
-        self.expanded = False
+        self.expanded: str | None = None
 
     # --- input -------------------------------------------------------------
 
@@ -60,16 +70,17 @@ class WeekScreen(Screen):
             self._confirm(rows[self.selection])
             return True
         if event.key == pygame.K_ESCAPE and self.expanded:
-            self.expanded = False
+            self.expanded = None
             self.selection = 0
             return True
         return False
 
     def _confirm(self, row: Row) -> None:
-        if row.action.kind == "train" and row.action.arg is None:
-            self.expanded = not self.expanded
-            # Land on the first stat, so training is Enter-Enter and repeats on Enter.
-            self.selection = 1 if self.expanded else 0
+        if row.action.kind in SUBMENU_ROOTS and row.action.arg is None:
+            opening = self.expanded != row.action.kind
+            self.expanded = row.action.kind if opening else None
+            # Land on the first child, so a choice is Enter-Enter and repeats on Enter.
+            self.selection += 1 if opening else 0
             return
         if not can_do(self.state, row.action):
             return
@@ -96,7 +107,7 @@ class WeekScreen(Screen):
         return result
 
     def _end_week(self) -> None:
-        self.expanded = False
+        self.expanded = None
         self.selection = 0
         if self.state.is_over:
             self.app.pop()
@@ -107,21 +118,35 @@ class WeekScreen(Screen):
     # --- layout ------------------------------------------------------------
 
     def _rows(self) -> list[Row]:
-        rows = [Row("act_train", PlayerAction("train"), 0)]
-        if self.expanded:
+        rows = [Row(strings.text("act_train"), PlayerAction("train"), 0)]
+        if self.expanded == "train":
             rows += [
-                Row(f"arg_{stat}", PlayerAction("train", stat), 1) for stat in TRAINABLE
+                Row(strings.text(f"arg_{stat}"), PlayerAction("train", stat), 1)
+                for stat in TRAINABLE
             ]
-        rows += [Row(f"act_{kind}", PlayerAction(kind), 0) for kind in ACTIONS]
+        for kind in ACTIONS:
+            rows.append(Row(strings.text(f"act_{kind}"), PlayerAction(kind), 0))
+            if kind == "socialise" and self.expanded == "socialise":
+                rows += [
+                    Row(self.npcs[npc].name, PlayerAction("socialise", npc), 1)
+                    for npc in self.npcs
+                    if npc in self.state.relationships
+                ]
         if self.state.match_pending:
-            rows.append(Row("act_start_match", PlayerAction("start_match"), 0))
-        rows.append(Row("act_end_week", PlayerAction("end_week"), 0))
+            rows.append(
+                Row(strings.text("act_start_match"), PlayerAction("start_match"), 0)
+            )
+        rows.append(Row(strings.text("act_end_week"), PlayerAction("end_week"), 0))
         return rows
 
     def _available(self, row: Row) -> bool:
-        if row.action.kind == "train" and row.action.arg is None:
-            return can_do(self.state, PlayerAction("train", TRAINABLE[0]))
-        return can_do(self.state, row.action)
+        """A submenu root is available when any of its children is."""
+        if row.action.arg is not None or row.action.kind not in SUBMENU_ROOTS:
+            return can_do(self.state, row.action)
+        args = (
+            TRAINABLE if row.action.kind == "train" else tuple(self.state.relationships)
+        )
+        return any(can_do(self.state, PlayerAction(row.action.kind, a)) for a in args)
 
     # --- drawing -----------------------------------------------------------
 
@@ -129,6 +154,7 @@ class WeekScreen(Screen):
         surface.fill(theme.bg_deep)
         self._draw_status(surface)
         self._draw_actions(surface)
+        self._draw_people(surface)
 
     def _draw_status(self, surface: pygame.Surface) -> None:
         state = self.state
@@ -162,10 +188,12 @@ class WeekScreen(Screen):
             y += ROW
 
         y += 16
-        # 07: form is exact, like every other number. Only the body is a word.
+        # 07: form is exact, like every other number. Only the body and mood are words.
         self._field(surface, y, "label_form", f"{state.form:.1f}")
         y += ROW + 16
         self._field(surface, y, "label_body", body_word(state))
+        y += ROW
+        self._field(surface, y, "label_mood", mood_word(state))
         y += ROW + 16
         self._field(surface, y, "label_money", f"{state.money:,}")
         y += ROW
@@ -221,7 +249,36 @@ class WeekScreen(Screen):
             if index == self.selection:
                 ring = pygame.Rect(x - 8, y - 4, 300 - 24 * row.indent, ROW)
                 pygame.draw.rect(surface, theme.accent_cold, ring, width=2)
-            text.draw(surface, strings.text(row.label_key), (x, y), "body", colour)
+            text.draw(surface, row.label, (x, y), "body", colour)
+            y += ROW
+
+    def _draw_people(self, surface: pygame.Surface) -> None:
+        """07: the dots are how long it has been. Nobody is warned they are drifting
+        until the name goes dim, which is roughly how it happens."""
+        y = TOP
+        text.draw(
+            surface,
+            strings.text("col_people"),
+            (COL_PEOPLE, y),
+            "label",
+            theme.text_dim,
+        )
+        y += ROW + 16
+        for npc_id, npc in self.npcs.items():
+            bond = self.state.relationships.get(npc_id)
+            if bond is None:
+                continue
+            week = self.state.week_index
+            drifted = relationships.is_drifted(bond, week)
+            colour = theme.text_dim if drifted else theme.text_muted
+            since = relationships.weeks_since_contact(bond, week)
+            mark = (
+                strings.text("people_drifted")
+                if drifted
+                else "·" * min(MAX_DRIFT_DOTS, max(0, since) // DRIFT_DOT_WEEKS)
+            )
+            text.draw(surface, npc.name, (COL_PEOPLE, y), "mono", colour)
+            text.draw(surface, mark, (COL_PEOPLE + 300, y), "mono", colour, right=True)
             y += ROW
 
 
@@ -233,3 +290,11 @@ def body_word(state: GameState) -> str:
     if state.is_injured:
         return words[5]
     return words[min(4, int(state.fatigue // 20))]
+
+
+def mood_word(state: GameState) -> str:
+    """07 §4: three psyche values collapse to one of seven words. The player must not
+    be able to read a number back out, so the bands are wide on purpose."""
+    words = strings.words("mood_words")
+    strain = psyche.strain(state.stress, state.hope, state.cynicism)
+    return words[min(len(words) - 1, int(strain // psyche.MOOD_BAND))]

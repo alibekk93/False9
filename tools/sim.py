@@ -7,7 +7,8 @@ from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass, field
 
 from false_nine.content import cards as card_content
-from false_nine.core.actions import PlayerAction, can_do, step
+from false_nine.content import npcs as npc_content
+from false_nine.core.actions import TRAINABLE, PlayerAction, can_do, step
 from false_nine.core.calendar import CAREER_WEEKS
 from false_nine.core.match.card import Card
 from false_nine.core.resources import BASE_AP, FATIGUE_TRAIN
@@ -22,6 +23,9 @@ Policy = Callable[[GameState], PlayerAction]
 
 TRAIN_THRESHOLD = 50.0
 WORK_UNTIL = 30_000
+# The two contrast policies below train only up to this fatigue, which leaves them
+# spare AP to spend differently. 50 would leave none. See `quiet` and `social`.
+STUDY_THRESHOLD = 30.0
 
 
 def train_max(state: GameState) -> PlayerAction:
@@ -29,8 +33,7 @@ def train_max(state: GameState) -> PlayerAction:
     if this player lands in the 70s at 26, nobody reaches the 90s. See 03 §3.1."""
     if state.is_injured or state.fatigue + FATIGUE_TRAIN >= TRAIN_THRESHOLD:
         return PlayerAction("recover")
-    weakest = min(("technique", "physical", "mental"), key=lambda s: getattr(state, s))
-    return PlayerAction("train", weakest)
+    return _train_weakest(state)
 
 
 def balanced(state: GameState) -> PlayerAction:
@@ -45,10 +48,38 @@ def broke(state: GameState) -> PlayerAction:
     return PlayerAction("work")
 
 
+def quiet(state: GameState) -> PlayerAction:
+    """Trains to a fatigue cap and lets the rest of the week go. Half of M3's
+    central claim: see `social` for the other half."""
+    return _study(state, PlayerAction("drift"))
+
+
+def social(state: GameState) -> PlayerAction:
+    """The same training under the same fatigue, spare AP spent on people rather
+    than wasted. Trains identically to `quiet` by construction, so any difference
+    in the ability curve is psyche leaking into stats — which 03 §4 forbids."""
+    people = sorted(state.relationships)
+    spare = PlayerAction("socialise", people[state.week_index % len(people)])
+    return _study(state, spare)
+
+
+def _study(state: GameState, spare: PlayerAction) -> PlayerAction:
+    if state.is_injured or state.fatigue + FATIGUE_TRAIN > STUDY_THRESHOLD:
+        return spare
+    return _train_weakest(state)
+
+
+def _train_weakest(state: GameState) -> PlayerAction:
+    weakest = min(TRAINABLE, key=lambda stat: getattr(state, stat))
+    return PlayerAction("train", weakest)
+
+
 POLICIES: dict[str, Policy] = {
     "train_max": train_max,
     "balanced": balanced,
     "broke": broke,
+    "quiet": quiet,
+    "social": social,
 }
 
 
@@ -60,6 +91,13 @@ class Career:
     final: GameState = field(default_factory=lambda: GameState(seed=""))
     ratings: list[float] = field(default_factory=list)
     squeezed_weeks: int = 0  # weeks that opened below 4 AP — fatigue or stress bit
+    dealt: int = 0  # cards dealt across every hand
+    polluted: int = 0  # of those, cards that came out of a pollution pool
+
+    @property
+    def pollution_rate(self) -> float:
+        """What share of the hands he was dealt were the week talking. 03 §5.3."""
+        return self.polluted / self.dealt if self.dealt else 0.0
 
 
 def best_card(state: GameState, cards: Mapping[str, Card]) -> str:
@@ -80,7 +118,7 @@ def run_career(
     until_week: int = CAREER_WEEKS + 1,
 ) -> Career:
     rng = Rng(seed)
-    state = GameState(seed=seed)
+    state = GameState(seed=seed, relationships=npc_content.starting_bonds())
     career = Career()
 
     while state.week_index < until_week:
@@ -101,6 +139,12 @@ def run_career(
 
         played, week = state.last_match_week, state.week_index
         state = step(state, action, rng, cards).state
+        if action.kind == "start_match":
+            career.dealt += len(state.match_hand)
+            career.polluted += sum(
+                cards[c].pool not in ("pool_positive", "pool_neutral")
+                for c in state.match_hand
+            )
         if state.last_match_week != played:
             career.ratings.append(state.last_match_rating)
         if state.week_index != week and state.ap < BASE_AP:
@@ -133,6 +177,9 @@ def report(careers: list[Career], strategy: str, elapsed_s: float) -> str:
             statistics.fmean(c.ratings) if c.ratings else 0.0 for c in careers
         ],
         "weeks under 4 AP": [float(c.squeezed_weeks) for c in careers],
+        "stress": [c.final.stress for c in careers],
+        "hope": [c.final.hope for c in careers],
+        "pollution in hand": [c.pollution_rate for c in careers],
     }
 
     header = " | ".join(f"p{p}".rjust(9) for p in PERCENTILES)
@@ -143,7 +190,8 @@ def report(careers: list[Career], strategy: str, elapsed_s: float) -> str:
         f"{'-' * 20} | {'-' * len(header)}",
     ]
     for name, values in rows.items():
-        cells = " | ".join(f"{v:9,.1f}" for v in percentiles(values))
+        digits = 3 if name == "pollution in hand" else 1
+        cells = " | ".join(f"{v:9,.{digits}f}" for v in percentiles(values))
         lines.append(f"{name:<20} | {cells}")
     return "\n".join(lines) + "\n"
 

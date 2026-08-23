@@ -12,20 +12,14 @@ QUALITY_FLOOR = 0.05
 QUALITY_CEILING = 0.95
 POOL_THRESHOLD = 35.0  # [TUNE] 03 §5.3
 
-# 03 §4 starting values, used as stand-ins until M3 puts hope and cynicism in
-# GameState. At these values neither drives its pool over POOL_THRESHOLD, so
-# pool_bitter and pool_flat simply never come up — no special case needed.
-HOPE_START = 75.0
-CYNICISM_START = 10.0
-
 
 def quality(
     ability: float,
     form: float,
     fatigue: float,
     stress: float,
-    cynicism: float = CYNICISM_START,
-    hope: float = HOPE_START,
+    cynicism: float,
+    hope: float,
 ) -> float:
     """03 §5.3. Deck quality is what the week did, not what a dice roll decided."""
     raw = (
@@ -40,15 +34,14 @@ def quality(
     return max(QUALITY_FLOOR, min(QUALITY_CEILING, raw))
 
 
-def pool_drivers(
-    state: GameState, cynicism: float = CYNICISM_START, hope: float = HOPE_START
-) -> dict[str, float]:
-    """03 §5.3. `pool_hurt` is listed for completeness; §1 keeps him out of the squad
-    while injured, so nothing drives it yet and no pool_hurt cards are authored."""
+def pool_drivers(state: GameState) -> dict[str, float]:
+    """03 §5.3. A pool with no authored cards is skipped by `_draw_noise`, so a driver
+    may lead the field here and still contribute nothing — `pool_hurt` never fires at
+    all, because §1 keeps him out of the squad while injured."""
     return {
         "pool_anxious": state.stress,
-        "pool_bitter": cynicism,
-        "pool_flat": 100.0 - hope,
+        "pool_bitter": state.cynicism,
+        "pool_flat": 100.0 - state.hope,
         "pool_tired": state.fatigue,
         "pool_hurt": 100.0 if state.is_injured else 0.0,
     }
@@ -68,7 +61,14 @@ def build(state: GameState, cards: Mapping[str, Card], stream: Stream) -> list[s
     grouped = by_pool(cards)
     positive_slots = round(
         POSITIVE_SLOTS_AT_FULL_QUALITY
-        * quality(state.ability, state.form, state.fatigue, state.stress)
+        * quality(
+            state.ability,
+            state.form,
+            state.fatigue,
+            state.stress,
+            state.cynicism,
+            state.hope,
+        )
     )
 
     deck = _draw_positive(state, cards, grouped, positive_slots, stream)

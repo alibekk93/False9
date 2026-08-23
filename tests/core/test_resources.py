@@ -8,7 +8,7 @@ from false_nine.content import cards
 from false_nine.core import resources
 from false_nine.core.actions import PlayerAction, step
 from false_nine.core.rng import Rng
-from false_nine.core.state import GameState
+from false_nine.core.state import Bond, GameState
 from tools.sim import run_career, train_max
 
 RNG = Rng("t")
@@ -74,9 +74,9 @@ def test_recover_sheds_fatigue_and_stress() -> None:
     assert (after.fatigue, after.stress) == (15.0, 24.0)
 
 
-def test_socialise_only_touches_stress() -> None:
-    before = state(stress=30.0)
-    after = step(before, PlayerAction("socialise"), RNG, {}).state
+def test_socialise_only_touches_stress_and_the_bond() -> None:
+    before = state(stress=30.0, relationships={"npc_x": Bond()})
+    after = step(before, PlayerAction("socialise", "npc_x"), RNG, {}).state
     assert after.stress == 22.0
     assert (after.technique, after.fatigue, after.money) == (
         before.technique,

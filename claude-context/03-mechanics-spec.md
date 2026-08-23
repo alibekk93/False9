@@ -38,7 +38,7 @@ Actions cost 1 AP each unless noted:
 | Train (choose: technique / physical / mental) | `+ability`, `+fatigue 12`, injury risk. Unavailable while injured. |
 | Recover | `-fatigue 25`, `-stress 6` [TUNE], `-0.5` weeks off an injury [TUNE] |
 | Work (side job) | `+money`, `+fatigue 8`, `-time for everything else` |
-| Socialise (choose NPC) | relationship deltas, `-stress 8` |
+| Socialise (choose NPC) | `+closeness 6`, `+trust 2`, `-stress 8`. Unavailable for a drifted NPC (§8). |
 | Deal With It | resolves a pending obligation: debt payment, bureaucracy, medical |
 | Drift | 0 AP, ends the week immediately. `+stress 5` [TUNE] if obligations pending. |
 
@@ -149,8 +149,20 @@ Four values, 0–100. Visible to the player as words, not numbers (see `07` §4)
 | `cynicism` | opportunities failing, corruption events, broken promises | warmth beats, sustained closeness with any NPC |
 | `self_knowledge` | reflection events, endings of arcs, honest choices | never falls |
 
-`hope` starts at 75 and drifts down `-0.8/season` passively from season 5. `cynicism`
-starts at 10. `self_knowledge` starts at 5 and is the only monotonic value in the game.
+`hope` starts at 75 and drifts down `-0.8/season` passively from season 5 — applied
+once at the end of each season from 5 onward, alongside the ability decay in §3.1.
+`cynicism` starts at 10. `self_knowledge` starts at 5 and is the only monotonic value in
+the game.
+
+`07` §4 shows three of these as a single word. The value behind it:
+
+```
+strain = stress + cynicism + (100 - hope)          # 0-300
+mood   = mood_words[min(6, strain // 30)]          # [TUNE: band 30]
+```
+
+A band of 30 puts a fresh 16-year-old on *steady* and reaches *done* at a strain of 180,
+which takes real damage on two axes at once rather than one bad season.
 
 Psyche does **not** modify ability. It modifies the deck (§5.3), event availability, and
 the ending. This separation must hold: a depressed protagonist is not worse at football,
@@ -318,8 +330,13 @@ acknowledges it. Do not add a consolation opportunity in Phase 3.
 Four axes per NPC, 0–100: `trust`, `respect`, `dependence`, `closeness`.
 
 - Socialise: `+closeness 6`, `+trust 2`, `-stress 8`. Requires the NPC be reachable.
-- Not contacting an NPC for **8+ weeks**: `-closeness 5`, and after 20 weeks the NPC
-  enters `drifted` state, requiring a repair event to restore.
+- Not contacting an NPC for **8+ weeks**: `-closeness 5`. This is charged **once per
+  eight weeks of silence** — at 8 weeks, again at 16, and so on — not every week past
+  the eighth. Weekly it would empty a bond in under four months, which is not what not
+  calling your mother does. Any contact resets the clock.
+- After **20 weeks** of silence the NPC is `drifted` and out of reach: Socialise no
+  longer offers them, and only a repair event brings them back. `drifted` is derived
+  from the last contact week, not stored, so it cannot fall out of sync with it.
 - Asking for money: `+dependence 15`, `-respect 5`, `-trust 3`. Gated on `trust ≥ 60`.
 - Keeping a promise: `+trust 12`. Breaking one: `-trust 20`. Asymmetric on purpose.
 - `dependence > 70` on any NPC unlocks resentment events on their side.

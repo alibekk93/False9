@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import pygame
 
+from false_nine.content import npcs as npc_content
 from false_nine.content import strings
 from false_nine.core.actions import Change
 from false_nine.ui import text, theme
@@ -14,10 +15,19 @@ REVEAL_MS = 90  # 06: watching the damage arrive one line at a time is the feeli
 MINUS = "−"  # U+2212, so a loss reads the same in the value and the delta columns
 
 MONEY_FIELDS = frozenset({"money", "debt"})
-PSYCHE_FIELDS = frozenset({"stress"})  # 07 §4: shown as a direction, never a number
+# 07 §4: shown as a direction, never a number.
+PSYCHE_FIELDS = frozenset({"stress", "hope", "cynicism", "self_knowledge"})
 WHOLE_FIELDS = frozenset({"injury_weeks_left", "injury_history"})
 LOWER_IS_BETTER = frozenset(
-    {"debt", "fatigue", "stress", "injury_weeks_left", "injury_history"}
+    {
+        "debt",
+        "fatigue",
+        "stress",
+        "cynicism",
+        "dependence",
+        "injury_weeks_left",
+        "injury_history",
+    }
 )
 
 
@@ -69,31 +79,37 @@ class LedgerScreen(Screen):
             )
 
     def _row(self, surface: pygame.Surface, y: int, change: Change) -> None:
+        npc, _, field = change.field.rpartition(".")
         delta = change.after - change.before
-        improved = (delta < 0) if change.field in LOWER_IS_BETTER else (delta > 0)
+        improved = (delta < 0) if field in LOWER_IS_BETTER else (delta > 0)
         colour = theme.pos if improved else theme.neg
 
-        text.draw(
-            surface,
-            strings.text(f"label_{change.field}"),
-            (LEFT, y),
-            "mono",
-            theme.text_muted,
-        )
+        text.draw(surface, label(change.field), (LEFT, y), "mono", theme.text_muted)
         # 07: the sign carries the meaning, so colour is never the only channel.
         sign = "+" if delta > 0 else MINUS
-        if change.field in PSYCHE_FIELDS:
+        if npc:
+            # 07's mockup shows the movement but not the value: how far a friendship
+            # has left to give is not a thing anyone knows about their own.
+            text.draw(
+                surface,
+                f"{sign}{number(field, abs(delta))}",
+                (LEFT + 600, y),
+                "mono",
+                colour,
+                right=True,
+            )
+        elif field in PSYCHE_FIELDS:
             # 07 §4: psyche is never a number. The direction is all the player gets.
             text.draw(surface, sign, (LEFT + 600, y), "mono", colour, right=True)
         else:
-            before = number(change.field, change.before)
-            arrow = f"{before} → {number(change.field, change.after)}"
+            before = number(field, change.before)
+            arrow = f"{before} → {number(field, change.after)}"
             text.draw(
                 surface, arrow, (LEFT + 460, y), "mono", theme.text_primary, right=True
             )
             text.draw(
                 surface,
-                f"{sign}{number(change.field, abs(delta))}",
+                f"{sign}{number(field, abs(delta))}",
                 (LEFT + 600, y),
                 "mono",
                 colour,
@@ -106,6 +122,14 @@ class LedgerScreen(Screen):
             "mono",
             theme.text_muted,
         )
+
+
+def label(field: str) -> str:
+    """A relationship row is `npc_id.axis`; everything else is a plain field name."""
+    npc, _, axis = field.rpartition(".")
+    if not npc:
+        return strings.text(f"label_{field}")
+    return f"{npc_content.load()[npc].name} {strings.text(f'label_{axis}')}"
 
 
 def number(field: str, value: float) -> str:

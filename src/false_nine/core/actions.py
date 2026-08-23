@@ -3,7 +3,7 @@ from __future__ import annotations
 from collections.abc import Mapping
 from dataclasses import dataclass, replace
 
-from false_nine.core import calendar, resources, stats
+from false_nine.core import calendar, psyche, relationships, resources, stats
 from false_nine.core.effects import Change, update
 from false_nine.core.match import play
 from false_nine.core.match.card import Card, Outcome
@@ -47,7 +47,10 @@ def can_do(state: GameState, action: PlayerAction) -> bool:
         return not state.is_injured and action.arg in TRAINABLE
     if action.kind == "deal_with_it":
         return state.debt > 0 and state.money > 0
-    return action.kind in {"recover", "work", "socialise", "drift"}
+    if action.kind == "socialise":
+        # 03 §2.1 makes it a choice of NPC, and §8 puts a drifted one out of reach.
+        return action.arg is not None and relationships.is_reachable(state, action.arg)
+    return action.kind in {"recover", "work", "drift"}
 
 
 def step(
@@ -76,7 +79,8 @@ def step(
     elif action.kind == "work":
         state = _work(state, effects)
     elif action.kind == "socialise":
-        state = _socialise(state, effects)
+        assert action.arg is not None  # can_do checked reachability
+        state = _socialise(state, action.arg, effects)
     elif action.kind == "deal_with_it":
         state = _deal_with_it(state, effects)
     elif action.kind == "drift":
@@ -115,6 +119,7 @@ def end_week(state: GameState, rng: Rng) -> StepResult:
             state, effects, "reason_overdrawn", debt=state.debt - state.money
         )
         state = replace(state, money=0)
+    state = relationships.decay(state, effects)
     if state.week == calendar.WEEKS_PER_SEASON:
         technique_loss, physical_loss = stats.season_decay(state.age)
         state = update(
@@ -123,6 +128,7 @@ def end_week(state: GameState, rng: Rng) -> StepResult:
             "reason_season_end",
             technique=_floored(state.technique - technique_loss),
             physical=_floored(state.physical - physical_loss),
+            hope=resources.clamp01_100(state.hope + psyche.season_drift(state.season)),
         )
 
     state = advance_week(state)
@@ -174,13 +180,14 @@ def _work(state: GameState, effects: list[Change]) -> GameState:
     )
 
 
-def _socialise(state: GameState, effects: list[Change]) -> GameState:
-    return update(
+def _socialise(state: GameState, npc: str, effects: list[Change]) -> GameState:
+    state = update(
         state,
         effects,
         "reason_socialise",
         stress=resources.clamp01_100(state.stress + resources.STRESS_SOCIALISE),
     )
+    return relationships.socialise(state, npc, effects)
 
 
 def _deal_with_it(state: GameState, effects: list[Change]) -> GameState:

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from false_nine.content import cards
+from false_nine.content import npcs as npc_content
 from false_nine.core.actions import PlayerAction, step
 from false_nine.core.rng import Rng
 from false_nine.core.save import dump, load
@@ -14,7 +15,7 @@ ACTIONS = [
     PlayerAction("recover"),
     PlayerAction("end_week"),
     PlayerAction("train", "mental"),
-    PlayerAction("socialise"),
+    PlayerAction("socialise", "npc_kostya"),
     PlayerAction("drift"),
     PlayerAction("end_week"),
 ]
@@ -25,7 +26,7 @@ def replay(seed: str, actions: list[PlayerAction]) -> GameState:
     interleaved with the picks the hand actually offers."""
     rng = Rng(seed)
     deck = cards.load()
-    state = GameState(seed=seed)
+    state = GameState(seed=seed, relationships=npc_content.starting_bonds())
     for action in actions * 12:
         if state.match_pending:
             state = step(state, PlayerAction("start_match"), rng, deck).state
@@ -48,6 +49,13 @@ def test_different_seeds_diverge() -> None:
 def test_the_replay_actually_played_matches() -> None:
     """Guards the guard: if matches stopped firing, the test above still passes."""
     assert replay("8f2c", ACTIONS).last_match_week > 0
+
+
+def test_the_replay_actually_socialised() -> None:
+    """Same guard for the action that took an argument in M3: an unreachable or
+    misnamed NPC would make every Socialise in the list a silent no-op."""
+    bond = replay("8f2c", ACTIONS).relationships["npc_kostya"]
+    assert bond.closeness > npc_content.load()["npc_kostya"].initial.closeness
 
 
 def test_a_full_career_is_reproducible() -> None:

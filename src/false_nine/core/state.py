@@ -1,11 +1,27 @@
 from __future__ import annotations
 
-from dataclasses import dataclass, replace
+from dataclasses import dataclass, field, replace
 
-from false_nine.core import calendar
+from false_nine.core import calendar, psyche
 from false_nine.core.match.card import BEATS
 
 HAND_SIZE = 5
+
+# 03 §8. Order is the order they are written to the ledger and drawn in the People
+# column, so it lives with the dataclass rather than in either consumer.
+AXES = ("trust", "respect", "dependence", "closeness")
+
+
+@dataclass(frozen=True)
+class Bond:
+    """One NPC's four axes plus the week he last made contact. The rules that move
+    these live in `relationships.py`; this is only the record."""
+
+    trust: float = 50.0
+    respect: float = 50.0
+    dependence: float = 20.0
+    closeness: float = 50.0
+    last_contact_week: int = 0
 
 
 @dataclass(frozen=True)
@@ -14,8 +30,9 @@ class GameState:
     phase are derived, so they cannot drift out of sync with each other.
 
     Fields are flat rather than nested so `save.load` can rebuild the state with
-    `GameState(**snapshot)`. Psyche (M3) and club (M4) will want their own dataclasses;
-    `stress` sits here alone until then."""
+    `GameState(**snapshot)`. `relationships` is the one exception — it is keyed by an
+    id that only `data/` knows, so it cannot be flattened — and `save.load` rebuilds
+    its `Bond`s by hand."""
 
     seed: str
     week_index: int = 1
@@ -25,8 +42,17 @@ class GameState:
     mental: float = 20.0
 
     fatigue: float = 0.0
-    stress: float = 20.0
     form: float = 50.0
+
+    # 03 §4. Four values, never shown as numbers, never touching ability.
+    stress: float = psyche.STRESS_START
+    hope: float = psyche.HOPE_START
+    cynicism: float = psyche.CYNICISM_START
+    self_knowledge: float = psyche.SELF_KNOWLEDGE_START
+
+    # Seeded from data/npcs at career start; empty in a bare state, which is what the
+    # core tests want. See content/npcs.starting_bonds.
+    relationships: dict[str, Bond] = field(default_factory=dict)
 
     money: int = 0
     debt: int = 0

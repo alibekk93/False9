@@ -1,12 +1,15 @@
 from __future__ import annotations
 
 import json
+from dataclasses import replace
 
 import pytest
 
-from false_nine.content import cards, reports
+from false_nine.content import cards, npcs, reports, strings
 from false_nine.content.strings import DATA
 from false_nine.core.match.card import BEATS
+from false_nine.core.state import AXES, GameState
+from false_nine.ui.screens.week import body_word, mood_word
 
 # Until data/ holds more than cards and reports, this file is the whole content gate.
 # tools/validate_content.py arrives with events, when CI needs it outside pytest.
@@ -80,3 +83,33 @@ def test_reports_are_the_authored_length() -> None:
     for texts in reports.load().values():
         for text in texts:
             assert 60 <= len(text.split()) <= 110, text[:40]
+
+
+def test_every_npc_loads_with_four_axes() -> None:
+    loaded = npcs.load()
+    assert len(loaded) == 7, "02: seven tracked NPCs"
+    for npc_id, npc in loaded.items():
+        assert npc_id.startswith("npc_"), npc_id
+        assert npc.name and npc.role, npc_id
+        assert all(0 <= getattr(npc.initial, axis) <= 100 for axis in AXES), npc_id
+    # 03 §9 reads these two by id when it decides the Reconciliation axis.
+    assert {"npc_mother", "npc_father"} <= set(loaded)
+
+
+def test_every_mood_word_is_reachable_and_in_order() -> None:
+    """07 §4: seven words, worst last. A band width that parked the player on one word
+    for most of a career would make Mood decoration rather than information."""
+    state = GameState(seed="t")
+    seen: list[str] = []
+    for value in range(101):
+        word = mood_word(replace(state, stress=value, cynicism=value, hope=100 - value))
+        if word not in seen:
+            seen.append(word)
+    assert seen == strings.words("mood_words")
+
+
+def test_every_body_word_is_reachable_and_in_order() -> None:
+    state = GameState(seed="t")
+    seen = [body_word(replace(state, fatigue=f)) for f in range(0, 101, 5)]
+    seen += [body_word(replace(state, injury_weeks_left=w)) for w in (1.0, 8.0)]
+    assert set(seen) == set(strings.words("body_words"))

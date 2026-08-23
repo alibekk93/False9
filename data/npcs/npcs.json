@@ -1,0 +1,47 @@
+{
+  "schema": "npc",
+  "items": [
+    {
+      "id": "npc_mother",
+      "name": "Mother",
+      "role": "mother",
+      "initial": {"trust": 85, "respect": 60, "dependence": 40, "closeness": 80}
+    },
+    {
+      "id": "npc_father",
+      "name": "Father",
+      "role": "father",
+      "initial": {"trust": 55, "respect": 45, "dependence": 15, "closeness": 45}
+    },
+    {
+      "id": "npc_kostya",
+      "name": "Kostya",
+      "role": "childhood_friend",
+      "initial": {"trust": 70, "respect": 50, "dependence": 20, "closeness": 75}
+    },
+    {
+      "id": "npc_teammate",
+      "name": "Vitya",
+      "role": "teammate",
+      "initial": {"trust": 40, "respect": 55, "dependence": 10, "closeness": 35}
+    },
+    {
+      "id": "npc_coach",
+      "name": "Ilya Nikolaevich",
+      "role": "coach",
+      "initial": {"trust": 60, "respect": 75, "dependence": 25, "closeness": 40}
+    },
+    {
+      "id": "npc_agent",
+      "name": "Ruslan",
+      "role": "agent",
+      "initial": {"trust": 30, "respect": 35, "dependence": 20, "closeness": 20}
+    },
+    {
+      "id": "npc_partner",
+      "name": "Dasha",
+      "role": "partner",
+      "initial": {"trust": 50, "respect": 50, "dependence": 25, "closeness": 55}
+    }
+  ]
+}
