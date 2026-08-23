@@ -35,7 +35,7 @@ data/
       "cooldown_weeks": 12,
       "requires": {
         "all": [
-          {"path": "club.solvency", "op": "<", "value": 45},
+          {"path": "club_solvency", "op": "<", "value": 45},
           {"path": "phase", "op": "in", "value": [2, 3]},
           {"path": "flags", "op": "not_contains", "value": "left_football"}
         ]
@@ -183,28 +183,38 @@ as a bug.
 
 ```json
 {"schema": "opportunity", "items": [{
-  "id": "opp_s5_tier3_trial",
+  "id": "opp_s05_move",
   "season": 5,
-  "window_weeks": [3, 7],
-  "tier_target": 3,
+  "window_weeks": [3, 8],
   "player_conditions": [
-    {"path": "ability", "op": ">=", "value": 52},
-    {"path": "form", "op": ">=", "value": 60},
-    {"path": "relationships.npc_agent.trust", "op": ">=", "value": 40}
+    {"path": "ability", "op": ">=", "value": 41},
+    {"path": "form", "op": ">=", "value": 48},
+    {"path": "relationships.npc_agent.trust", "op": ">=", "value": 36}
   ],
   "world_conditions": [
-    {"id": "scout_attends",        "p": 0.65, "reveal_week": 4, "fail_event": "ev_of_scout_flight"},
-    {"id": "manager_still_there",  "p": 0.70, "reveal_week": 5, "fail_event": "ev_of_manager_sacked"},
-    {"id": "club_has_budget",      "p": 0.60, "reveal_week": 6, "fail_event": "ev_of_budget_gone"},
-    {"id": "no_academy_signing",   "p": 0.60, "reveal_week": 6, "fail_event": "ev_of_academy_kid"},
-    {"id": "medical_clears",       "p": 0.75, "reveal_week": 7, "fail_event": "ev_of_old_ankle"}
+    {"id": "scout_attends",      "p": 0.60, "reveal_week": 4, "fail_event": "ev_of_s5_scout"},
+    {"id": "club_has_budget",    "p": 0.62, "reveal_week": 5, "fail_event": "ev_of_s5_budget"},
+    {"id": "no_academy_signing", "p": 0.58, "reveal_week": 6, "fail_event": "ev_of_s5_academy"},
+    {"id": "paperwork_clears",   "p": 0.62, "reveal_week": 7, "fail_event": "ev_of_s5_paperwork"}
   ],
-  "success_event": "ev_of_signed_tier3"
+  "success_event": "ev_of_signed_early",
+  "fail_event_player": "ev_of_s5_not_ready"
 }]}
 ```
 
 `reveal_week` is what makes failure ordinary rather than cruel: the condition resolves
-and the player learns about it *during* the arc, not at the end. See `03` §7.2.
+and the player learns about it *during* the arc, not at the end. See `03` §7.2. Two
+conditions in one arc may not share a `reveal_week` — one of the scenes would never be
+seen. `fail_event_player` is the scene for the failure he did control (`03` §7.3).
+
+**There is no `tier_target`.** The rung is `state.tier - 1` and the ceiling is that
+nothing is offered at tier 2; an authored copy of the same rule is how it goes stale.
+
+Validation the loader enforces, because each is a rule and not a preference: **4–6**
+world conditions, each `p` inside **0.55–0.75**, and the product of them inside
+**0.08–0.15** (`03` §7.2). Every `fail_event`, `success_event` and `fail_event_player`
+must name an authored scene — `03` §7.3 is a hard rule and a missing scene is a startup
+error, not a generic line at week 94.
 
 ## 5. Condition expression language
 

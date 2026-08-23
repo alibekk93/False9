@@ -1,0 +1,154 @@
+{
+  "schema": "event",
+  "items": [
+    {
+      "id": "ev_of_s5_scout",
+      "tags": ["opportunity", "phase2"],
+      "notes": "08 §8: PFL travel. The distance does the work no villain has to.",
+      "scene": {
+        "location": "away_ground",
+        "time_of_day": "afternoon",
+        "body": [
+          "He was going to watch you at Kalach. Kalach is six hours by road and the road is closed at Sosnovka.",
+          "He watched somebody nearer instead. Ruslan tells you this as though it is neutral information, because it is."
+        ]
+      },
+      "choices": [
+        {
+          "id": "c_ask_for_another_date",
+          "text": "Ask Ruslan to find another date.",
+          "effects": [
+            {"type": "relationship", "npc": "npc_agent", "key": "trust", "delta": -2},
+            {"type": "psyche", "key": "hope", "delta": 2}
+          ],
+          "outcome_text": "There are four fixtures left. He says he will look at them and the call ends."
+        },
+        {
+          "id": "c_say_understood",
+          "text": "Say you understand.",
+          "effects": [{"type": "psyche", "key": "cynicism", "delta": 4}],
+          "outcome_text": "You do understand. That is the part you keep turning over on the bus home."
+        }
+      ]
+    },
+    {
+      "id": "ev_of_s5_budget",
+      "tags": ["opportunity", "phase2", "money"],
+      "notes": "08 §8: provincial economics, a wage ceiling and an argument nobody wins.",
+      "scene": {
+        "location": "office",
+        "time_of_day": "morning",
+        "body": [
+          "The budget for the second half of the season was signed off in March and revised in June.",
+          "In the revision there is no line for a forward. There is a line for the pitch, which needs doing."
+        ]
+      },
+      "choices": [
+        {
+          "id": "c_offer_to_take_less",
+          "text": "Offer to come for less.",
+          "effects": [
+            {"type": "psyche", "key": "stress", "delta": 5},
+            {"type": "psyche", "key": "self_knowledge", "delta": 2}
+          ],
+          "outcome_text": "The director says that is not how the line works. He is right and he is not unkind about it."
+        },
+        {
+          "id": "c_leave_the_office",
+          "text": "Leave it.",
+          "effects": [{"type": "psyche", "key": "cynicism", "delta": 4}],
+          "outcome_text": "On the way out you pass the pitch. Two men are marking it out in the rain."
+        }
+      ]
+    },
+    {
+      "id": "ev_of_s5_academy",
+      "tags": ["opportunity", "phase2"],
+      "notes": "03 §7.3: the club with money has the relationship.",
+      "scene": {
+        "location": "changing_room",
+        "time_of_day": "evening",
+        "body": [
+          "The place went to a boy on loan from a club three divisions up. No fee. They pay half his wage.",
+          "Vitya says it out loud before anyone else does, the way Vitya always does."
+        ]
+      },
+      "choices": [
+        {
+          "id": "c_agree_with_vitya",
+          "text": "Agree with Vitya.",
+          "effects": [
+            {"type": "relationship", "npc": "npc_teammate", "key": "closeness", "delta": 4},
+            {"type": "psyche", "key": "cynicism", "delta": 3}
+          ],
+          "outcome_text": "He buys the beers. It is the best twenty minutes of the week and you both know it."
+        },
+        {
+          "id": "c_change_the_subject",
+          "text": "Change the subject.",
+          "effects": [{"type": "psyche", "key": "stress", "delta": 5}],
+          "outcome_text": "He lets you. He is older and he has been the one who needed the subject changed."
+        }
+      ]
+    },
+    {
+      "id": "ev_of_s5_paperwork",
+      "tags": ["opportunity", "phase2"],
+      "notes": "03 §7.3: the paperwork sits on a desk in Moscow until the window closes.",
+      "scene": {
+        "location": "corridor",
+        "time_of_day": "afternoon",
+        "body": [
+          "The registration went in on the eleventh. It needed a second signature that nobody named.",
+          "The window closed at six on Friday. The form is not lost. It is on a desk, and the desk is in Moscow."
+        ]
+      },
+      "choices": [
+        {
+          "id": "c_call_the_office",
+          "text": "Call the office yourself.",
+          "effects": [
+            {"type": "psyche", "key": "stress", "delta": 7},
+            {"type": "psyche", "key": "self_knowledge", "delta": 2}
+          ],
+          "outcome_text": "A woman explains the procedure twice, patiently, and it is the correct procedure."
+        },
+        {
+          "id": "c_wait_for_january",
+          "text": "Wait for the winter window.",
+          "effects": [{"type": "psyche", "key": "hope", "delta": -3}],
+          "outcome_text": "By January the squad list has eighteen names on it and none of them left."
+        }
+      ]
+    },
+    {
+      "id": "ev_of_s5_not_ready",
+      "tags": ["opportunity", "phase2"],
+      "scene": {
+        "location": "training_ground",
+        "time_of_day": "morning",
+        "body": [
+          "They had you for four days. Nothing went wrong. The pitch was good and the weather held.",
+          "On the last morning the coach watches the whole session from the halfway line and does not come over."
+        ]
+      },
+      "choices": [
+        {
+          "id": "c_go_and_ask",
+          "text": "Go and ask him directly.",
+          "effects": [
+            {"type": "psyche", "key": "self_knowledge", "delta": 5},
+            {"type": "psyche", "key": "stress", "delta": 3}
+          ],
+          "outcome_text": "He says you are a good player at this level. He does not say which level he means and you do not ask."
+        },
+        {
+          "id": "c_get_the_bus",
+          "text": "Get your bag and get the bus.",
+          "effects": [{"type": "psyche", "key": "cynicism", "delta": 4}],
+          "outcome_text": "Somebody shouts thanks across the car park. You raise a hand without turning round."
+        }
+      ]
+    }
+  ]
+}

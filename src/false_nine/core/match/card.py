@@ -2,10 +2,11 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-# 05 §3. `pool_bitter` and `pool_flat` are driven by real state since M3 but hold no
-# cards yet: nothing raises cynicism or drops hope far enough until M4's failed
-# opportunities, and M5 authors eight per pool. `deck._draw_noise` skips an empty
-# pool, so the drivers can lead the field and still contribute nothing.
+# 05 §3. `pool_bitter` and `pool_flat` hold no cards yet. Their drivers went live at
+# M3 and M4 finally moves them — failed chances and unpaid wages take cynicism to 100
+# in a career that keeps nobody close — so the eight per pool M5 authors now have
+# something to answer. `deck._draw_noise` skips an empty pool, so until then the
+# drivers can lead the field and still contribute nothing.
 POOLS = frozenset(
     {
         "pool_positive",

@@ -1,0 +1,39 @@
+{
+  "schema": "event",
+  "items": [
+    {
+      "id": "ev_club_folds",
+      "tags": ["club", "money"],
+      "notes": "08 §8: the town whose team had been gone five years and whose stadium had grown over.",
+      "scene": {
+        "location": "changing_room",
+        "time_of_day": "morning",
+        "body": [
+          "There is a notice on the door with the league's name at the top and a date in the middle of it.",
+          "Everything they owe everyone goes with it. Somebody asks about the arrears and is told there is nobody left to ask.",
+          "The kit man is loading the van because the van belongs to him."
+        ]
+      },
+      "choices": [
+        {
+          "id": "c_help_with_the_van",
+          "text": "Help him load the van.",
+          "effects": [
+            {"type": "relationship", "npc": "npc_teammate", "key": "closeness", "delta": 6},
+            {"type": "psyche", "key": "self_knowledge", "delta": 4}
+          ],
+          "outcome_text": "It takes forty minutes. Vitya finds two balls behind the lockers and puts one in your bag."
+        },
+        {
+          "id": "c_take_your_boots",
+          "text": "Take your boots and go.",
+          "effects": [
+            {"type": "psyche", "key": "cynicism", "delta": 6},
+            {"type": "psyche", "key": "stress", "delta": 4}
+          ],
+          "outcome_text": "The gate is padlocked by the time you reach it, so you go out the way the crowd goes out."
+        }
+      ]
+    }
+  ]
+}

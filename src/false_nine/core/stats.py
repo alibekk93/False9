@@ -7,10 +7,14 @@ from false_nine.core.rng import Stream
 from false_nine.core.state import GameState
 
 # Calibrated against tools.sim.train_max — the player who trains as hard as the fatigue
-# system permits and ignores money entirely. He reaches a median ability of 75 at 26 and
-# never passes 79 across 200 seeds: good, not elite. The spec's first guess of 1.6 put
-# that same player in the high 90s. See 03 §3.1.
-BASE_GAIN = 0.85
+# system permits and ignores money entirely. He lands at a median ability of 72 at 26
+# and does not pass 83 across 60 seeds: good, not elite.
+#
+# M4 moved this from 0.85 to 1.55 and the anchor did not move with it. `facilities` was
+# an implicit 1.0 until clubs existed; it is now the 0.5-0.6 of the tier-five grounds he
+# actually trains on, because he fails his chances and stays there. The curve is
+# unchanged — the world it runs in got specific. See 03 §3.1.
+BASE_GAIN = 1.55
 DIMINISHING_EXPONENT = 0.7
 
 # Ability has a floor and deliberately NO ceiling. The career ceiling is enforced by the

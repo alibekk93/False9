@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import replace
+from typing import Any
 
 from false_nine.core.effects import Change
 from false_nine.core.resources import clamp01_100
@@ -12,6 +13,14 @@ TRUST_SOCIALISE = 2.0
 NEGLECT_WEEKS = 8
 NEGLECT_CLOSENESS = -5.0
 DRIFT_WEEKS = 20
+
+# 03 §4 names the rule and no number: cynicism falls from sustained closeness with any
+# NPC. [TUNE] Charged once a season, because "sustained" is not a weekly event and a
+# row every week would bury the ledger. Over sixteen seasons this is worth about what
+# six failed chances and a run of unpaid wages cost — which is the trade the game is
+# making, and without it cynicism is a ratchet that pins at 100 by Phase 3.
+CLOSENESS_WARMTH = 70.0
+CYNICISM_WARMTH_SEASON = -4.0
 
 
 def weeks_since_contact(bond: Bond, week_index: int) -> int:
@@ -44,6 +53,31 @@ def socialise(state: GameState, npc: str, effects: list[Change]) -> GameState:
         ),
         "reason_socialise",
     )
+
+
+def is_warm(state: GameState) -> bool:
+    """Whether anybody is still close enough to take the edge off. One is enough: 03
+    §4 says any NPC, and the difference between one and four is not the claim."""
+    return any(
+        bond.closeness >= CLOSENESS_WARMTH for bond in state.relationships.values()
+    )
+
+
+def adjust(
+    state: GameState,
+    effects: list[Change],
+    npc: str,
+    axis: str,
+    delta: float,
+    reason: str,
+) -> GameState:
+    """One axis, one reason. What an authored effect moves (05 §2). It deliberately
+    leaves `last_contact_week` alone: a scene about someone is not contact with them."""
+    bond = state.relationships[npc]
+    # The axis is a string from `data/`, so the field cannot be named at type-check
+    # time. `apply.validate` has already checked it against AXES at load.
+    moved: Any = {axis: clamp01_100(getattr(bond, axis) + delta)}
+    return _write(state, effects, npc, bond, replace(bond, **moved), reason)
 
 
 def decay(state: GameState, effects: list[Change]) -> GameState:

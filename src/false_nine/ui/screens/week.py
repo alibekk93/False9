@@ -4,9 +4,9 @@ from dataclasses import dataclass
 
 import pygame
 
-from false_nine.content import cards as card_content
+from false_nine.content import bundle, strings
+from false_nine.content import clubs as club_content
 from false_nine.content import npcs as npc_content
-from false_nine.content import strings
 from false_nine.core import psyche, relationships
 from false_nine.core.actions import (
     TRAINABLE,
@@ -20,8 +20,10 @@ from false_nine.core.rng import Rng
 from false_nine.core.state import GameState
 from false_nine.ui import text, theme
 from false_nine.ui.app import App, Screen
+from false_nine.ui.screens.event import EventScreen
 from false_nine.ui.screens.ledger import LedgerScreen
 from false_nine.ui.screens.match import MatchScreen
+from false_nine.ui.screens.season import SeasonScreen
 
 COL_STATUS = 64
 COL_WEEK = 476
@@ -50,8 +52,10 @@ class WeekScreen(Screen):
         self.app = app
         self.state = state
         self.rng = Rng(state.seed)
-        self.cards = card_content.load()
+        self.content = bundle.load()
+        self.cards = self.content.cards
         self.npcs = npc_content.load()
+        self.clubs = club_content.load()
         self.week_effects: list[Change] = []
         self.selection = 0
         self.expanded: str | None = None
@@ -100,18 +104,25 @@ class WeekScreen(Screen):
         self.selection = min(self.selection, len(self._rows()) - 1)
 
     def apply(self, action: PlayerAction) -> StepResult:
-        """MatchScreen calls this too, so every change reaches one ledger."""
-        result = step(self.state, action, self.rng, self.cards)
+        """MatchScreen, EventScreen and SeasonScreen call this too, so every change
+        reaches one ledger."""
+        result = step(self.state, action, self.rng, self.content)
         self.state = result.state
         self.week_effects.extend(result.effects)
         return result
 
     def _end_week(self) -> None:
+        """Pushed in reverse: the ledger lands on top and each pop uncovers the next
+        thing the week produced, so he reads what changed before he answers for it."""
         self.expanded = None
         self.selection = 0
         if self.state.is_over:
             self.app.pop()
             return
+        if self.state.week == 1:
+            self.app.push(SeasonScreen(self.app, self))
+        for event_id in reversed(self.state.pending_events):
+            self.app.push(EventScreen(self.app, self, self.content.events[event_id]))
         self.app.push(LedgerScreen(self.app, self.week_effects))
         self.week_effects = []
 
@@ -195,10 +206,27 @@ class WeekScreen(Screen):
         y += ROW
         self._field(surface, y, "label_mood", mood_word(state))
         y += ROW + 16
+        club = self.clubs.get(state.club_id)
+        self._field(
+            surface,
+            y,
+            "label_club",
+            club.name if club else strings.text("label_no_club"),
+            theme.text_primary if club else theme.text_dim,
+        )
+        y += ROW
+        if state.contract_wage:
+            self._field(surface, y, "label_contract_wage", f"{state.contract_wage:,}")
+            y += ROW
+
+        y += 16
         self._field(surface, y, "label_money", f"{state.money:,}")
         y += ROW
         if state.debt:
             self._field(surface, y, "label_debt", f"{state.debt:,}", theme.neg)
+            y += ROW
+        if state.is_owed_wages:
+            self._field(surface, y, "label_arrears", f"{state.arrears:,}", theme.neg)
             y += ROW
         if state.is_injured:
             weeks = strings.text(

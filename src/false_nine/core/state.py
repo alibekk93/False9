@@ -57,6 +57,29 @@ class GameState:
     money: int = 0
     debt: int = 0
 
+    # 03 §6. The club's fixed attributes stay in `data/`; what moves lives here.
+    # `tier` is his level and not the club's — it moves only when an opportunity is
+    # converted, never as a function of ability. That is 03 §7.1 in one field.
+    tier: int = 5
+    club_id: str = ""
+    club_solvency: float = 0.0
+    contract_wage: int = 0
+    contract_seasons_left: int = 0
+    arrears: int = 0
+    offers: tuple[str, ...] = ()
+
+    # 03 §7. The arc in progress, its conditions already rolled, and what he has
+    # already been told. `failure_scenes_seen` spans the career, not the arc.
+    opportunity_id: str = ""
+    opportunity_failed: tuple[str, ...] = ()
+    opportunity_revealed: tuple[str, ...] = ()
+    opportunities_converted: int = 0
+    failure_scenes_seen: tuple[str, ...] = ()
+
+    # Scenes he owes the game before the week can end, and 05 §2's string flags.
+    pending_events: tuple[str, ...] = ()
+    flags: tuple[str, ...] = ()
+
     ap: int = 4
 
     injury_weeks_left: float = 0.0
@@ -69,6 +92,8 @@ class GameState:
     match_performance: float = 0.0
     last_match_week: int = 0
     last_match_rating: float = 0.0
+    # 03 §5.4: −1, 0 or 1. Shown, never celebrated, and it feeds nothing.
+    last_team_result: int = 0
 
     @property
     def season(self) -> int:
@@ -115,6 +140,14 @@ class GameState:
             and not self.is_injured
             and self.last_match_week != self.week_index
         )
+
+    @property
+    def is_employed(self) -> bool:
+        return bool(self.club_id)
+
+    @property
+    def is_owed_wages(self) -> bool:
+        return self.arrears > 0
 
     @property
     def is_over(self) -> bool:

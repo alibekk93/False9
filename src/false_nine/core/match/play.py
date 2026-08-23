@@ -21,6 +21,14 @@ MOMENTUM_WEIGHT = 0.3
 
 FORM_INERTIA = 0.7  # 03 §3.2
 
+# [TUNE] 03 §5.4. The opponent is drawn around his own club's strength — a league of
+# peers, which is what a division is — and his rating nudges it. There is no opponent
+# model and there is not going to be one (rule 6); this exists so the week can say who
+# won without the game ever making that his score.
+OPPONENT_SPREAD = 15.0
+RESULT_RATING_WEIGHT = 0.06
+RESULT_EDGE = 0.12
+
 
 def start(state: GameState, cards: Mapping[str, Card], rng: Rng) -> GameState:
     stream = rng.stream("deck", state.week_index)
@@ -83,10 +91,27 @@ def pick_outcome(card: Card, stream: Stream) -> Outcome:
     return card.outcomes[-1]
 
 
-def finish(state: GameState, rng: Rng, effects: list[Change]) -> GameState:
+def team_result(strength: float, rating: float, stream: Stream) -> int:
+    """−1, 0 or 1. 03 §5.4: drawn from club strength against an opponent and nudged by
+    his rating, and it is **not** the player's score. Nothing reads it back — not the
+    deck, not form, not the match report, which stays banded on rating alone."""
+    opponent = stream.uniform(strength - OPPONENT_SPREAD, strength + OPPONENT_SPREAD)
+    edge = (strength - opponent) / 100.0 + (rating - BASE_RATING) * RESULT_RATING_WEIGHT
+    roll = stream.random() - 0.5 + edge
+    if roll > RESULT_EDGE:
+        return 1
+    if roll < -RESULT_EDGE:
+        return -1
+    return 0
+
+
+def finish(
+    state: GameState, rng: Rng, effects: list[Change], strength: float
+) -> GameState:
     rating = max(
         RATING_FLOOR, min(RATING_CEILING, BASE_RATING + state.match_performance)
     )
+    result = team_result(strength, rating, rng.stream("team_result", state.week_index))
     state = update(
         state,
         effects,
@@ -111,4 +136,5 @@ def finish(state: GameState, rng: Rng, effects: list[Change]) -> GameState:
         match_performance=0.0,
         last_match_week=state.week_index,
         last_match_rating=rating,
+        last_team_result=result,
     )

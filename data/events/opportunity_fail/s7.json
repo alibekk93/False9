@@ -1,0 +1,150 @@
+{
+  "schema": "event",
+  "items": [
+    {
+      "id": "ev_of_s7_manager",
+      "tags": ["opportunity", "phase2"],
+      "notes": "03 §7.3: sacked eleven days before the trial.",
+      "scene": {
+        "location": "changing_room",
+        "time_of_day": "morning",
+        "body": [
+          "Eleven days out, they let him go. Four games without a win and a home crowd of nine hundred.",
+          "He had watched you twice. He had used the word interesting, and he had meant it enough to say it to Ruslan."
+        ]
+      },
+      "choices": [
+        {
+          "id": "c_write_to_him",
+          "text": "Write to him anyway.",
+          "effects": [
+            {"type": "psyche", "key": "self_knowledge", "delta": 3},
+            {"type": "psyche", "key": "hope", "delta": 2}
+          ],
+          "outcome_text": "He answers in a week. He is at his brother's in Voronezh and he wishes you luck, and that is all there is."
+        },
+        {
+          "id": "c_delete_the_number",
+          "text": "Take his number out of your phone.",
+          "effects": [{"type": "psyche", "key": "cynicism", "delta": 5}],
+          "outcome_text": "It takes two seconds. You find yourself sitting on the bench afterwards for longer than that."
+        }
+      ]
+    },
+    {
+      "id": "ev_of_s7_budget",
+      "tags": ["opportunity", "phase2", "money"],
+      "notes": "08 §8: the club is bought and the new owner brings players with him.",
+      "scene": {
+        "location": "office",
+        "time_of_day": "afternoon",
+        "body": [
+          "The club has a new owner. He has a concrete business and four players he likes.",
+          "Two of them play where you play. Nobody at the club knew until the photographs went up on the site."
+        ]
+      },
+      "choices": [
+        {
+          "id": "c_ask_ruslan_s7",
+          "text": "Ask Ruslan what it means.",
+          "effects": [
+            {"type": "relationship", "npc": "npc_agent", "key": "trust", "delta": -3},
+            {"type": "psyche", "key": "stress", "delta": 4}
+          ],
+          "outcome_text": "He takes the call in a car park. He says give it a month. A month is the whole window."
+        },
+        {
+          "id": "c_look_at_the_photos",
+          "text": "Look them up.",
+          "effects": [{"type": "psyche", "key": "cynicism", "delta": 4}],
+          "outcome_text": "One of them is thirty-one and has been at six clubs. You watch four minutes of him and stop."
+        }
+      ]
+    },
+    {
+      "id": "ev_of_s7_medical",
+      "tags": ["opportunity", "phase2", "injury"],
+      "scene": {
+        "location": "clinic",
+        "time_of_day": "morning",
+        "body": [
+          "The scan is on a screen turned half away from you. The doctor points at a grey area with a pen.",
+          "He says it is old and it is not dangerous. He says at your age they take the view they take."
+        ]
+      },
+      "choices": [
+        {
+          "id": "c_ask_to_see_the_scan",
+          "text": "Ask to see the screen properly.",
+          "effects": [{"type": "psyche", "key": "self_knowledge", "delta": 4}],
+          "outcome_text": "He turns it. You look at it for a while and it is a grey area on a screen."
+        },
+        {
+          "id": "c_get_dressed",
+          "text": "Get dressed.",
+          "effects": [{"type": "psyche", "key": "stress", "delta": 6}],
+          "outcome_text": "The corridor has a laminated sign about the correct order of documents. You read all of it."
+        }
+      ]
+    },
+    {
+      "id": "ev_of_s7_travel",
+      "tags": ["opportunity", "phase2"],
+      "notes": "08 §8: the Vostok reforms, distance as a structural barrier.",
+      "scene": {
+        "location": "bus_station",
+        "time_of_day": "night",
+        "body": [
+          "The connection at Kamensk was forty minutes and the first bus was eighty minutes late.",
+          "You arrive at ten past two in the afternoon. The session was at eleven and it is over, and everyone is friendly about it."
+        ]
+      },
+      "choices": [
+        {
+          "id": "c_ask_to_stay",
+          "text": "Ask if you can stay for tomorrow.",
+          "effects": [
+            {"type": "psyche", "key": "hope", "delta": 3},
+            {"type": "money", "delta": -3000}
+          ],
+          "outcome_text": "There is no tomorrow. They are away on Wednesday and the squad went in this morning."
+        },
+        {
+          "id": "c_get_the_bus_back",
+          "text": "Get the bus back.",
+          "effects": [{"type": "psyche", "key": "cynicism", "delta": 5}],
+          "outcome_text": "It leaves at 18:40 and you sit in the station for four hours with your bag on your knees."
+        }
+      ]
+    },
+    {
+      "id": "ev_of_s7_not_ready",
+      "tags": ["opportunity", "phase2"],
+      "scene": {
+        "location": "office",
+        "time_of_day": "afternoon",
+        "body": [
+          "The word is honest. They have watched enough of you to be specific, and they are.",
+          "It is the first time anyone has been specific in four years and it is not the way you wanted it."
+        ]
+      },
+      "choices": [
+        {
+          "id": "c_write_it_down",
+          "text": "Write down what he says.",
+          "effects": [
+            {"type": "psyche", "key": "self_knowledge", "delta": 7},
+            {"type": "psyche", "key": "hope", "delta": 2}
+          ],
+          "outcome_text": "Four things, in the back of the notebook you use for bus times. Two of them you can fix."
+        },
+        {
+          "id": "c_shake_his_hand",
+          "text": "Shake his hand.",
+          "effects": [{"type": "psyche", "key": "stress", "delta": 5}],
+          "outcome_text": "He walks you as far as the gate, which is further than he had to."
+        }
+      ]
+    }
+  ]
+}

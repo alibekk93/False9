@@ -1,0 +1,151 @@
+{
+  "schema": "event",
+  "items": [
+    {
+      "id": "ev_of_s3_scout",
+      "tags": ["opportunity", "phase1"],
+      "notes": "08 §8, geography as structural barrier: the trial is fine, the flight is not.",
+      "scene": {
+        "location": "training_ground",
+        "time_of_day": "morning",
+        "body": [
+          "Ilya Nikolaevich takes his phone away from his ear and puts it in his pocket.",
+          "The man from Orlovka is not coming. Everything out of Yekaterinburg is grounded until Thursday.",
+          "They will send someone with a camera instead. The camera is already here, on a tripod, pointed at the far goal."
+        ]
+      },
+      "choices": [
+        {
+          "id": "c_play_for_the_camera",
+          "text": "Play for the camera.",
+          "effects": [{"type": "psyche", "key": "stress", "delta": 5}],
+          "outcome_text": "You know where it is for ninety minutes. You play like a man who knows where a camera is."
+        },
+        {
+          "id": "c_play_the_game",
+          "text": "Forget the camera and play the game.",
+          "effects": [
+            {"type": "psyche", "key": "self_knowledge", "delta": 3},
+            {"type": "relationship", "npc": "npc_coach", "key": "respect", "delta": 3}
+          ],
+          "outcome_text": "Ilya Nikolaevich says you were the best of them. Nobody in Orlovka watches the tape."
+        }
+      ]
+    },
+    {
+      "id": "ev_of_s3_manager",
+      "tags": ["opportunity", "phase1"],
+      "notes": "08 §7: the coach who mattered is not lying, he is wrong.",
+      "scene": {
+        "location": "corridor",
+        "time_of_day": "evening",
+        "body": [
+          "The man who asked about you was sacked on Tuesday. It was in the district paper before anyone told the club.",
+          "Whoever comes next will want his own list. Yours was on the desk of a man who cleared his desk."
+        ]
+      },
+      "choices": [
+        {
+          "id": "c_ask_who_is_next",
+          "text": "Ask who they are bringing in.",
+          "effects": [{"type": "psyche", "key": "cynicism", "delta": 3}],
+          "outcome_text": "Nobody knows yet. Two names go around the changing room and neither of them is real."
+        },
+        {
+          "id": "c_keep_training",
+          "text": "Say nothing and go to training.",
+          "effects": [{"type": "psyche", "key": "stress", "delta": 4}],
+          "outcome_text": "You are first there. It makes no difference and you do it anyway."
+        }
+      ]
+    },
+    {
+      "id": "ev_of_s3_academy",
+      "tags": ["opportunity", "phase1"],
+      "notes": "03 §7.3: the academy has a relationship and his agent does not.",
+      "scene": {
+        "location": "changing_room",
+        "time_of_day": "afternoon",
+        "body": [
+          "They have taken a boy from an academy two hundred kilometres north. He is nineteen. You have played against him.",
+          "He is not better than you. His club and their club have been sending each other players for eleven years."
+        ]
+      },
+      "choices": [
+        {
+          "id": "c_ask_ruslan",
+          "text": "Ask Ruslan whether anything can still be done.",
+          "effects": [
+            {"type": "relationship", "npc": "npc_agent", "key": "dependence", "delta": 5},
+            {"type": "psyche", "key": "hope", "delta": 2}
+          ],
+          "outcome_text": "He says he will make a call this week. He says it in the voice he uses for the whole list."
+        },
+        {
+          "id": "c_let_it_go",
+          "text": "Let it go.",
+          "effects": [{"type": "psyche", "key": "self_knowledge", "delta": 4}],
+          "outcome_text": "You look him up later. He plays eleven minutes all season."
+        }
+      ]
+    },
+    {
+      "id": "ev_of_s3_medical",
+      "tags": ["opportunity", "phase1", "injury"],
+      "notes": "03 §7.3: not badly. Just enough.",
+      "scene": {
+        "location": "clinic",
+        "time_of_day": "morning",
+        "body": [
+          "The doctor turns your ankle in his hands twice and writes for a long time.",
+          "He says there is a little movement in it that should not be there. He asks if it hurts. It does not hurt.",
+          "He writes that down too, and then he writes something else."
+        ]
+      },
+      "choices": [
+        {
+          "id": "c_tell_him_its_fine",
+          "text": "Tell him it has never stopped you.",
+          "effects": [{"type": "psyche", "key": "stress", "delta": 6}],
+          "outcome_text": "He agrees with you and does not change the form."
+        },
+        {
+          "id": "c_say_nothing_clinic",
+          "text": "Say nothing.",
+          "effects": [{"type": "psyche", "key": "cynicism", "delta": 4}],
+          "outcome_text": "In the corridor a woman asks if you are the boy for the trial. You say you were."
+        }
+      ]
+    },
+    {
+      "id": "ev_of_s3_not_ready",
+      "tags": ["opportunity", "phase1"],
+      "notes": "03 §7.3: the failure he did control still gets a scene of its own.",
+      "scene": {
+        "location": "bus_station",
+        "time_of_day": "evening",
+        "body": [
+          "Everything that could have gone your way went your way. The scout came, the money was there, nothing tore.",
+          "You were not good enough yet. The man who tells you is kind about it and takes forty seconds."
+        ]
+      },
+      "choices": [
+        {
+          "id": "c_ask_what_to_work_on",
+          "text": "Ask what to work on.",
+          "effects": [
+            {"type": "psyche", "key": "self_knowledge", "delta": 6},
+            {"type": "psyche", "key": "hope", "delta": 3}
+          ],
+          "outcome_text": "He says everything, evenly, and means it as encouragement. On the bus you write three of them down."
+        },
+        {
+          "id": "c_thank_him",
+          "text": "Thank him and go.",
+          "effects": [{"type": "psyche", "key": "stress", "delta": 5}],
+          "outcome_text": "The bus is at seven. You are early for it by an hour and ten minutes."
+        }
+      ]
+    }
+  ]
+}

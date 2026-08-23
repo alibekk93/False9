@@ -4,9 +4,10 @@ from dataclasses import replace
 
 import pytest
 
-from false_nine.content import cards
+from false_nine.content import bundle
 from false_nine.core import resources
 from false_nine.core.actions import PlayerAction, step
+from false_nine.core.content import Content
 from false_nine.core.rng import Rng
 from false_nine.core.state import Bond, GameState
 from tools.sim import run_career, train_max
@@ -61,7 +62,7 @@ def test_fatigue_clamps_at_both_ends() -> None:
 
 
 def test_work_pays_and_tires() -> None:
-    after = step(state(), PlayerAction("work"), RNG, {}).state
+    after = step(state(), PlayerAction("work"), RNG, Content()).state
     assert after.money == 6_000
     assert after.fatigue == 8.0
     assert after.ap == 3
@@ -69,14 +70,14 @@ def test_work_pays_and_tires() -> None:
 
 def test_recover_sheds_fatigue_and_stress() -> None:
     after = step(
-        state(fatigue=40.0, stress=30.0), PlayerAction("recover"), RNG, {}
+        state(fatigue=40.0, stress=30.0), PlayerAction("recover"), RNG, Content()
     ).state
     assert (after.fatigue, after.stress) == (15.0, 24.0)
 
 
 def test_socialise_only_touches_stress_and_the_bond() -> None:
     before = state(stress=30.0, relationships={"npc_x": Bond()})
-    after = step(before, PlayerAction("socialise", "npc_x"), RNG, {}).state
+    after = step(before, PlayerAction("socialise", "npc_x"), RNG, Content()).state
     assert after.stress == 22.0
     assert (after.technique, after.fatigue, after.money) == (
         before.technique,
@@ -86,30 +87,36 @@ def test_socialise_only_touches_stress_and_the_bond() -> None:
 
 
 def test_deal_with_it_pays_what_it_can() -> None:
-    after = step(state(money=5_000, debt=12_000), PlayerAction("deal_with_it"), RNG, {})
+    after = step(
+        state(money=5_000, debt=12_000), PlayerAction("deal_with_it"), RNG, Content()
+    )
     assert (after.state.money, after.state.debt) == (0, 7_000)
 
     clears = step(
-        state(money=20_000, debt=12_000), PlayerAction("deal_with_it"), RNG, {}
+        state(money=20_000, debt=12_000), PlayerAction("deal_with_it"), RNG, Content()
     )
     assert (clears.state.money, clears.state.debt) == (8_000, 0)
 
 
 def test_deal_with_it_is_unavailable_without_debt() -> None:
     before = state(money=5_000)
-    assert step(before, PlayerAction("deal_with_it"), RNG, {}).state == before
+    assert step(before, PlayerAction("deal_with_it"), RNG, Content()).state == before
 
 
 def test_drift_ends_the_week_and_stresses_only_when_owed() -> None:
-    calm = step(state(stress=30.0), PlayerAction("drift"), RNG, {}).state
+    calm = step(state(stress=30.0), PlayerAction("drift"), RNG, Content()).state
     assert (calm.ap, calm.stress) == (0, 30.0)
 
-    owing = step(state(stress=30.0, debt=1_000), PlayerAction("drift"), RNG, {}).state
+    owing = step(
+        state(stress=30.0, debt=1_000), PlayerAction("drift"), RNG, Content()
+    ).state
     assert (owing.ap, owing.stress) == (0, 35.0)
 
 
 def test_week_end_charges_living_cost_and_converts_overdraft_to_debt() -> None:
-    after = step(state(ap=0, money=1_000), PlayerAction("end_week"), RNG, {}).state
+    after = step(
+        state(ap=0, money=1_000), PlayerAction("end_week"), RNG, Content()
+    ).state
     assert after.money == 0
     assert after.debt == 3_000  # 4_000 living cost in phase 1, 1_000 covered
     assert after.week_index == 2
@@ -117,25 +124,27 @@ def test_week_end_charges_living_cost_and_converts_overdraft_to_debt() -> None:
 
 def test_week_end_charges_interest_before_new_debt_lands() -> None:
     after = step(
-        state(ap=0, money=0, debt=100_000), PlayerAction("end_week"), RNG, {}
+        state(ap=0, money=0, debt=100_000), PlayerAction("end_week"), RNG, Content()
     ).state
     assert after.debt == 103_000 + 4_000
 
 
 def test_week_end_refreshes_ap_and_sheds_passive_fatigue() -> None:
-    after = step(state(ap=0, fatigue=30.0), PlayerAction("end_week"), RNG, {}).state
+    after = step(
+        state(ap=0, fatigue=30.0), PlayerAction("end_week"), RNG, Content()
+    ).state
     assert (after.fatigue, after.ap) == (22.0, 4)
 
 
 def test_end_week_needs_ap_spent_first() -> None:
     before = state(ap=2)
-    assert step(before, PlayerAction("end_week"), RNG, {}).state == before
+    assert step(before, PlayerAction("end_week"), RNG, Content()).state == before
 
 
 def test_money_and_debt_stay_integral_across_a_career() -> None:
     """Matches are in the loop now, so this runs through the harness rather than a
     hand-rolled loop that would stall on the first unplayed match."""
     for seed in range(4):
-        final = run_career(f"ints{seed}", train_max, cards.load(), until_week=41).final
+        final = run_career(f"ints{seed}", train_max, bundle.load(), until_week=41).final
         assert isinstance(final.money, int) and isinstance(final.debt, int)
         assert final.debt >= 0 and final.money >= 0

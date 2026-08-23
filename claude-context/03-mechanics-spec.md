@@ -115,7 +115,14 @@ Measured at M2, with matches in the loop, across 1000 seeds: **median ability 70
 the anchor spends more AP on Recover than he did at M1, when the same policy reached a
 median of 75. `base_gain` did **not** move for this — the M2 band is 68–78 and 70.5 sits
 inside it. A player who also works to live lands nearer 53.
-**Re-calibrate at M4**, when club wages free AP that currently has to go to Work.
+
+**Recalibrated at M4.** `base_gain` moved from 0.85 to **1.55**, and the anchor did not
+move with it: 1000 seeds give **median ability 72.1 at 26, 99th percentile 80.8**.
+Nothing about the curve changed. `facility_factor` was an implicit 1.0 until clubs
+existed and is now the **0.5–0.6** of the tier-five grounds he actually trains on,
+because he fails his chances and stays there. The knob absorbed the world getting
+specific. `tools.sim.careerist` — the same training plus keeping his agent warm — lands
+at 62.9, and the eight points are what those Socialise AP cost him.
 
 ### 3.2 Form (0–100)
 
@@ -153,6 +160,21 @@ Four values, 0–100. Visible to the player as words, not numbers (see `07` §4)
 once at the end of each season from 5 onward, alongside the ability decay in §3.1.
 `cynicism` starts at 10. `self_knowledge` starts at 5 and is the only monotonic value in
 the game.
+
+The table above names two movements without numbers. M4 gives them, both `[TUNE]`:
+
+| Movement | Value | Where |
+|---|---|---|
+| An opportunity fails | `hope -8`, `cynicism +6` | `core/opportunity.py` |
+| An opportunity converts | `hope +12`, `cynicism -4` | `core/opportunity.py` |
+| Sustained closeness (any NPC at `closeness ≥ 70`) | `cynicism -4` per season | `core/relationships.py` |
+
+Warmth is charged **once a season, not weekly**: "sustained" is not a weekly event, and
+a ledger row every week would bury the screen. Without it `cynicism` is a one-way
+ratchet — six failed chances and a run of unpaid wages pin it at 100 by Phase 3, which
+flattens the deck pollution the whole of §5.3 rests on. Measured over full careers:
+`tools.sim.social` ends at cynicism **56**, `quiet` and `careerist` at **100**. Same
+football, different life, and it is the deck that shows the difference.
 
 `07` §4 shows three of these as a single word. The value behind it:
 
@@ -235,23 +257,47 @@ Team result is drawn from club strength vs opponent strength, nudged by `rating`
 
 ### 6.2 Wages
 
-Each payday (weeks 5 and 10):
+`wage_offer` is **what one payday pays** — not a month and not a season. The calendar
+has ten weeks and two paydays, and a per-payday figure is the only one both of those can
+be read against. A tier-4 club therefore pays ₽90,000 a season against Phase 2's
+₽120,000 of living cost, which is why side work does not stop mattering.
+
+Each payday (weeks 5 and 10), with `s = solvency / 100`:
 ```
-p_paid_in_full = solvency / 100
-roll -> full | partial (50%) | nothing
+full    = s
+partial = (1 - s) * s        # half the wage
+nothing = (1 - s) ** 2
 ```
+Two draws of the same solvency: the money has to exist, and then somebody has to find
+some of it. An even split of the remainder would have a club at solvency zero paying
+half a wage half the time, which is not what a club at solvency zero does — see `08` §8
+on squads playing months without pay.
+
 Missed wages accumulate as `arrears`. Arrears may be paid in a lump later (30% chance at
 season end) or written off when a club folds. Unpaid wages add `+8 stress` per incident
 and `+4 cynicism`.
 
-`solvency` drifts down for tier 4–5 clubs and can trigger `ev_club_folds`, which
-terminates the contract mid-season and voids arrears. Directly modelled on the real
-lower-division cases in `08` §8.
+`solvency` drifts down **`-0.5`/week at tier 4 and `-0.8`/week at tier 5** [TUNE], and is
+stable at tiers 1–3. Below **10** it triggers `ev_club_folds`, which terminates the
+contract mid-season and voids arrears. Signing at a **new** club takes that club's
+solvency; **re-signing where he already is keeps the number he has watched slide**, so
+staying put is how a club folds under him. Directly modelled on the real lower-division
+cases in `08` §8.
 
 ### 6.3 Contracts
 
-Length 1–3 seasons. Expiry triggers the transfer window resolution, which is where the
-opportunity system (§7) does its work.
+Length 1–3 seasons, decided by tier and not by a roll — the further down he is, the less
+anyone will commit to: **tier 2 → 3 seasons, tier 3 → 2, tiers 4–5 → 1**.
+
+He starts at the one club in `data/clubs` carrying the `home` trait — tier 5, no wage,
+on a deal that runs exactly the three seasons of Phase 1, so 02's placement falls out of
+the contract expiring rather than needing a rule of its own.
+
+Expiry triggers the transfer window: **1–3 clubs at his current tier**, drawn
+deterministically and shown with exact terms — wage, seasons, facilities, solvency,
+town. No negotiation and no auction. No offers means a season unemployed, at
+`facilities 0.5`. Nothing in the window reads ability: **what tier will have him is §7's
+business, not his.**
 
 ## 7. The opportunity system — THE CEILING
 
@@ -277,11 +323,17 @@ of which the player controls some and not others.
 
 ```
 Opportunity:
-  id, tier_target, window (season, weeks)
+  id, season, window_weeks
   player_conditions:   [ability >= X, form >= Y, fitness ok, agent.trust >= Z]
   world_conditions:    [scout_attends, club_has_budget, manager_still_employed,
-                        no_competing_signing, visa_ok, timing]
+                        no_competing_signing, travel_works, paperwork_clears]
+  success_event, fail_event_player
 ```
+
+**There is no authored `tier_target`.** `state.tier` is his level, it moves **only** when
+an opportunity converts, and converting always moves it by exactly one. An arc is
+offered while `tier > 2` and not at all above it (§7.4). Two sources of truth for the
+same rung is how the ceiling rots, so the ladder is the only one.
 
 Player conditions are genuinely achievable and genuinely matter. World conditions are
 each individually plausible, each around **55–75% likely**, and there are **four to six
@@ -293,6 +345,19 @@ about one small success and five specific, memorable failures.
 early in the arc, and are *knowable* — the player can find out that the scout cancelled,
 often before the trial. The failure is not a surprise dice roll at the end. It is a
 gathering, visible, ordinary disappointment.
+
+All of an arc's conditions are rolled **once, at the week the window opens**, before he
+has done anything, and none of them is ever rerolled. Each then reaches him at its own
+`reveal_week`. The **first failure he is told about ends the arc** — one scene per
+chance, which caps a career at six of the thirty authored and is what makes §7.3's
+uniqueness structural rather than lucky. If M6 reports the arcs ending too abruptly,
+fire every revealed failure and dedupe across the career instead.
+
+Measured over 1000 careers against `tools.sim.careerist` — 03 §7.2's well-prepared
+player, who trains hard *and* keeps his agent warm: **mean 0.65 chances converted**,
+distribution `{0: 501, 1: 367, 2: 113, 3: 19}`, six chances seen in every career, and
+no career living the same failure scene twice. `tools.sim.broke` converts **zero**,
+which is the other half of the claim: the player's inputs genuinely matter.
 
 ### 7.3 Mandatory: every failure has a name
 
@@ -311,13 +376,34 @@ Minimum **12 authored failure scenes** in `data/events/opportunity_fail/`, each 
 a specific condition, each mundane, none malicious. A player who fails six opportunities
 must fail them six different ways.
 
+M4 authors **24**, four per chance, and **no two chances share one**. Since a chance
+fires at most once a career, that makes the uniqueness rule hold by construction rather
+than by a probability argument. The scene chosen is the earliest-revealed failure he has
+not already lived; if a career ever exhausted them, `test_failure_scenes_unique_per_career`
+would say so and **the fix is another authored scene, never code that hides the repeat**.
+
+**The failure he did control gets a name too.** A player who meets none of the player
+conditions while the world holds is not owed a shrug: each opportunity carries its own
+`fail_event_player`, six more scenes, and because each fires at most once a career those
+cannot repeat either.
+
 ### 7.4 Success is real but small
 
 Converting an opportunity moves the protagonist up **one tier at most**, to a club that
-is itself precarious. There is no opportunity in the game with `tier_target < 2`. The
-top of the achievable world is a mid-table second-tier club in a city of 400,000, on
-₽180,000/month, in a squad where he is respected. That is the best ending the career
-can produce and it is, deliberately, fine.
+is itself precarious. Nothing in the game aims above tier 2. The top of the achievable
+world is a mid-table second-tier club in a city of 400,000, on ₽178,000 a payday, in a
+squad where he is respected. That is the best ending the career can produce and it is,
+deliberately, fine.
+
+**This is the whole of §7.1's enforcement.** At tier 2 nothing further is offered — not
+because a counter says he has had enough, but because there is no step up left to
+offer. `tier` is the only field the ladder moves and nothing else in the game writes to
+it. The move is not instant: converting ends his contract and the window at the end of
+the season does the rest, which is how it happens.
+
+The ladder from tier 5 is therefore **three rungs**, and an honest probability model
+will occasionally climb all three. Measured: **1.9% of careers** reach tier 2. That is
+the model being honest, not a hole in it — see the note in `09` M4.
 
 ### 7.5 Opportunity schedule
 

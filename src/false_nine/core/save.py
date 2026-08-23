@@ -9,7 +9,24 @@ from false_nine.core.state import Bond, GameState
 # 2: M3 added the psyche fields and `relationships`. An M2 save has no bonds to
 # rebuild, so it fails on the version check rather than on a KeyError three lines
 # later. Migration proper is M9.
-SAVE_VERSION = 2
+# 3: M4 added the club, the contract and the opportunity arc.
+SAVE_VERSION = 3
+
+# JSON has no tuples. Anything stored as one comes back a list and would compare
+# unequal to the state it was written from, so it is named here rather than rebuilt by
+# hand one line at a time — a field added to GameState and forgotten here is a
+# roundtrip failure, and the list is the thing that gets read when it happens.
+TUPLE_FIELDS = frozenset(
+    {
+        "match_hand",
+        "offers",
+        "opportunity_failed",
+        "opportunity_revealed",
+        "failure_scenes_seen",
+        "pending_events",
+        "flags",
+    }
+)
 
 
 def dump(state: GameState, action_log: Iterable[dict[str, Any]] = ()) -> dict[str, Any]:
@@ -30,13 +47,12 @@ def load(payload: dict[str, Any]) -> GameState:
     snapshot = payload["state"]
     if payload.get("seed") != snapshot.get("seed"):
         raise ValueError("save seed does not match its state")
-    # JSON has neither tuples nor dataclasses, so a saved hand comes back as a list
-    # and a saved bond as a plain dict; both would compare unequal to the state they
-    # were written from.
+    # JSON has neither tuples nor dataclasses, so a saved bond comes back as a plain
+    # dict and every tuple as a list.
     return GameState(
         **{
             **snapshot,
-            "match_hand": tuple(snapshot["match_hand"]),
+            **{name: tuple(snapshot[name]) for name in TUPLE_FIELDS},
             "relationships": {
                 npc: Bond(**axes) for npc, axes in snapshot["relationships"].items()
             },

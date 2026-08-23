@@ -6,6 +6,7 @@ import pytest
 
 from false_nine.core import resources
 from false_nine.core.actions import PlayerAction, can_do, step
+from false_nine.core.content import Content
 from false_nine.core.match import play
 from false_nine.core.match.card import Card, Outcome
 from false_nine.core.rng import Rng
@@ -27,6 +28,7 @@ def _card(card_id: str, rating: float, momentum: int = 0) -> Card:
 
 CARDS = {c.id: c for c in (_card(f"card_{i}", 0.5) for i in range(8))}
 CARDS["card_swing"] = _card("card_swing", 1.0, 1)
+CONTENT = Content(cards=CARDS)
 
 FILLER = ("card_0", "card_1", "card_2", "card_3", "card_4")
 
@@ -42,13 +44,13 @@ def dealt(*first: str) -> GameState:
 
 
 def start(state: GameState, rng: Rng) -> GameState:
-    return step(state, PlayerAction("start_match"), rng, CARDS).state
+    return step(state, PlayerAction("start_match"), rng, CONTENT).state
 
 
 def play_out(state: GameState, rng: Rng, picks: list[str] | None = None) -> GameState:
     for _ in range(3):
         card_id = picks.pop(0) if picks else state.match_hand[0]
-        state = step(state, PlayerAction("play_card", card_id), rng, CARDS).state
+        state = step(state, PlayerAction("play_card", card_id), rng, CONTENT).state
     return state
 
 
@@ -78,7 +80,7 @@ def test_a_hand_is_dealt_and_shrinks_one_card_per_beat() -> None:
     for expected_beat in (1, 2, 3):
         assert state.beat == expected_beat
         state = step(
-            state, PlayerAction("play_card", state.match_hand[0]), rng, CARDS
+            state, PlayerAction("play_card", state.match_hand[0]), rng, CONTENT
         ).state
     assert state.match_hand == ()  # the two discards go with the finished match
 
@@ -119,7 +121,7 @@ def test_momentum_carries_into_the_beats_that_follow() -> None:
 def test_rating_stays_inside_one_to_ten() -> None:
     """Three cards cannot reach either bound, so the clamp is checked where it lives."""
     for performance in (-99.0, 99.0):
-        finished = play.finish(fresh(match_performance=performance), Rng("t"), [])
+        finished = play.finish(fresh(match_performance=performance), Rng("t"), [], 40.0)
         assert play.RATING_FLOOR <= finished.last_match_rating <= play.RATING_CEILING
 
 
@@ -151,7 +153,9 @@ def test_the_ledger_records_the_match() -> None:
     state = start(fresh(), rng)
     effects = []
     for _ in range(3):
-        result = step(state, PlayerAction("play_card", state.match_hand[0]), rng, CARDS)
+        result = step(
+            state, PlayerAction("play_card", state.match_hand[0]), rng, CONTENT
+        )
         state, _ = result.state, effects.extend(result.effects)
     assert {change.field for change in effects} >= {"form", "fatigue"}
     assert all(change.reason.startswith("reason_") for change in effects)

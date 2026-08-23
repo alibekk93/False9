@@ -1,0 +1,147 @@
+{
+  "schema": "event",
+  "items": [
+    {
+      "id": "ev_of_s11_medical",
+      "tags": ["opportunity", "phase3", "injury"],
+      "scene": {
+        "location": "clinic",
+        "time_of_day": "morning",
+        "body": [
+          "They do the knee twice because the first set of images was not clear enough at the back.",
+          "The doctor is careful with the word wear. He uses it four times and each time he puts something in front of it."
+        ]
+      },
+      "choices": [
+        {
+          "id": "c_ask_how_many_years",
+          "text": "Ask how many years are in it.",
+          "effects": [
+            {"type": "psyche", "key": "self_knowledge", "delta": 6},
+            {"type": "psyche", "key": "hope", "delta": -3}
+          ],
+          "outcome_text": "He says that is not a question the images answer. Then he answers it anyway, roughly, and he is not wrong."
+        },
+        {
+          "id": "c_thank_the_doctor",
+          "text": "Thank him and get dressed.",
+          "effects": [{"type": "psyche", "key": "stress", "delta": 6}],
+          "outcome_text": "Outside it has started to snow on snow that has already been walked on."
+        }
+      ]
+    },
+    {
+      "id": "ev_of_s11_budget",
+      "tags": ["opportunity", "phase3", "money"],
+      "scene": {
+        "location": "office",
+        "time_of_day": "afternoon",
+        "body": [
+          "The money went into the roof of the west stand, which has been temporary for six years.",
+          "The director shows you the invoice without meaning anything by it. It is simply what is on his desk."
+        ]
+      },
+      "choices": [
+        {
+          "id": "c_ask_about_next_year",
+          "text": "Ask about next year.",
+          "effects": [{"type": "psyche", "key": "hope", "delta": 2}],
+          "outcome_text": "He says next year is next year. He has said it before and it has been true both times."
+        },
+        {
+          "id": "c_look_at_the_invoice",
+          "text": "Look at the invoice.",
+          "effects": [{"type": "psyche", "key": "cynicism", "delta": 5}],
+          "outcome_text": "It is for slightly less than four seasons of what they would have paid you."
+        }
+      ]
+    },
+    {
+      "id": "ev_of_s11_academy",
+      "tags": ["opportunity", "phase3"],
+      "scene": {
+        "location": "training_ground",
+        "time_of_day": "morning",
+        "body": [
+          "The place has gone to a twenty-year-old they have had since he was fourteen. Nobody had to decide anything.",
+          "He warms up beside you on the Tuesday and copies the thing you do with your ankles."
+        ]
+      },
+      "choices": [
+        {
+          "id": "c_show_him",
+          "text": "Show him how to do it properly.",
+          "effects": [
+            {"type": "psyche", "key": "self_knowledge", "delta": 5},
+            {"type": "psyche", "key": "cynicism", "delta": -3}
+          ],
+          "outcome_text": "He gets it on the fourth go. He says thanks twice, once at the time and once at the end of the session."
+        },
+        {
+          "id": "c_move_along",
+          "text": "Move further down the line.",
+          "effects": [{"type": "psyche", "key": "stress", "delta": 5}],
+          "outcome_text": "He follows a week later and does it beside you again, and this time you leave it."
+        }
+      ]
+    },
+    {
+      "id": "ev_of_s11_paperwork",
+      "tags": ["opportunity", "phase3"],
+      "scene": {
+        "location": "corridor",
+        "time_of_day": "afternoon",
+        "body": [
+          "The release from your club had to be countersigned by a man who was on leave until the seventeenth.",
+          "The window shut on the fifteenth. He came back to a stack of them and yours was near the middle."
+        ]
+      },
+      "choices": [
+        {
+          "id": "c_ask_to_appeal",
+          "text": "Ask if anything can be appealed.",
+          "effects": [
+            {"type": "psyche", "key": "stress", "delta": 6},
+            {"type": "psyche", "key": "self_knowledge", "delta": 2}
+          ],
+          "outcome_text": "There is a form for it. It is submitted to the same office and it is not urgent."
+        },
+        {
+          "id": "c_accept_it",
+          "text": "Leave it.",
+          "effects": [{"type": "psyche", "key": "cynicism", "delta": 4}],
+          "outcome_text": "You are still registered here. Training is at half nine and the bus goes from the corner."
+        }
+      ]
+    },
+    {
+      "id": "ev_of_s11_not_ready",
+      "tags": ["opportunity", "phase3"],
+      "scene": {
+        "location": "training_ground",
+        "time_of_day": "morning",
+        "body": [
+          "Nothing was against you. They looked properly and they took their time about it.",
+          "At twenty-six the question they are asking has changed shape, and you can hear the new shape in how they say it."
+        ]
+      },
+      "choices": [
+        {
+          "id": "c_ask_them_straight",
+          "text": "Ask them straight.",
+          "effects": [
+            {"type": "psyche", "key": "self_knowledge", "delta": 7},
+            {"type": "psyche", "key": "hope", "delta": -2}
+          ],
+          "outcome_text": "They say they are looking for someone to have for five years. You understand the sentence completely."
+        },
+        {
+          "id": "c_leave_it_there",
+          "text": "Leave it there.",
+          "effects": [{"type": "psyche", "key": "stress", "delta": 4}],
+          "outcome_text": "The drive back is two hours and you do it with the radio off."
+        }
+      ]
+    }
+  ]
+}

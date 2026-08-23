@@ -29,6 +29,8 @@ MEASURE = 1280 - 2 * theme.MARGIN
 # can lose to; holding Enter only ever moves it forward.
 HOLD_MS = 1600
 
+RESULT_WORDS = {-1: "result_loss", 0: "result_draw", 1: "result_win"}
+
 
 class MatchScreen(Screen):
     """Three beats of card play. The hand and every consequence live in GameState —
@@ -199,6 +201,23 @@ class MatchScreen(Screen):
             theme.text_muted,
         )
         text.draw(surface, f"{rating:.1f}", (LEFT + 300, TOP + 56), "mono", right=True)
+        # 03 §5.4: the result is stated and never celebrated. It sits under his rating
+        # in the same muted grey whichever way it went.
+        text.draw(
+            surface,
+            strings.text("match_result"),
+            (LEFT, TOP + 84),
+            "mono",
+            theme.text_muted,
+        )
+        text.draw(
+            surface,
+            strings.text(RESULT_WORDS[self.week.state.last_team_result]),
+            (LEFT + 300, TOP + 84),
+            "mono",
+            theme.text_muted,
+            right=True,
+        )
         text.draw_wrapped(surface, self.report, (LEFT, TOP + 120), MEASURE, "body")
         text.draw(
             surface,

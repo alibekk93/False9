@@ -1,0 +1,116 @@
+{
+  "schema": "opportunity",
+  "items": [
+    {
+      "id": "opp_s03_trial",
+      "season": 3,
+      "window_weeks": [2, 7],
+      "notes": "03 §7.5. The first one, and the placement 02 ends Phase 1 with. The player conditions are the easiest they will ever be.",
+      "player_conditions": [
+        {"path": "ability", "op": ">=", "value": 34},
+        {"path": "form", "op": ">=", "value": 46},
+        {"path": "injury_weeks_left", "op": "==", "value": 0.0}
+      ],
+      "world_conditions": [
+        {"id": "scout_attends", "p": 0.62, "reveal_week": 3, "fail_event": "ev_of_s3_scout"},
+        {"id": "manager_still_there", "p": 0.65, "reveal_week": 4, "fail_event": "ev_of_s3_manager"},
+        {"id": "no_academy_signing", "p": 0.58, "reveal_week": 5, "fail_event": "ev_of_s3_academy"},
+        {"id": "medical_clears", "p": 0.60, "reveal_week": 6, "fail_event": "ev_of_s3_medical"}
+      ],
+      "success_event": "ev_of_signed_early",
+      "fail_event_player": "ev_of_s3_not_ready"
+    },
+    {
+      "id": "opp_s05_move",
+      "season": 5,
+      "window_weeks": [3, 8],
+      "notes": "The first one Ruslan has to be involved in. 08 §7: he answers the phone 40% of the time, and trust is how often it is your call he takes.",
+      "player_conditions": [
+        {"path": "ability", "op": ">=", "value": 41},
+        {"path": "form", "op": ">=", "value": 48},
+        {"path": "relationships.npc_agent.trust", "op": ">=", "value": 36}
+      ],
+      "world_conditions": [
+        {"id": "scout_attends", "p": 0.60, "reveal_week": 4, "fail_event": "ev_of_s5_scout"},
+        {"id": "club_has_budget", "p": 0.62, "reveal_week": 5, "fail_event": "ev_of_s5_budget"},
+        {"id": "no_academy_signing", "p": 0.58, "reveal_week": 6, "fail_event": "ev_of_s5_academy"},
+        {"id": "paperwork_clears", "p": 0.62, "reveal_week": 7, "fail_event": "ev_of_s5_paperwork"}
+      ],
+      "success_event": "ev_of_signed_early",
+      "fail_event_player": "ev_of_s5_not_ready"
+    },
+    {
+      "id": "opp_s07_trial",
+      "season": 7,
+      "window_weeks": [2, 8],
+      "player_conditions": [
+        {"path": "ability", "op": ">=", "value": 46},
+        {"path": "form", "op": ">=", "value": 50},
+        {"path": "injury_weeks_left", "op": "==", "value": 0.0}
+      ],
+      "world_conditions": [
+        {"id": "manager_still_there", "p": 0.63, "reveal_week": 3, "fail_event": "ev_of_s7_manager"},
+        {"id": "club_has_budget", "p": 0.58, "reveal_week": 5, "fail_event": "ev_of_s7_budget"},
+        {"id": "medical_clears", "p": 0.60, "reveal_week": 6, "fail_event": "ev_of_s7_medical"},
+        {"id": "travel_works", "p": 0.60, "reveal_week": 7, "fail_event": "ev_of_s7_travel"}
+      ],
+      "success_event": "ev_of_signed_mid",
+      "fail_event_player": "ev_of_s7_not_ready"
+    },
+    {
+      "id": "opp_s09_move",
+      "season": 9,
+      "window_weeks": [3, 9],
+      "player_conditions": [
+        {"path": "ability", "op": ">=", "value": 49},
+        {"path": "form", "op": ">=", "value": 52},
+        {"path": "relationships.npc_agent.trust", "op": ">=", "value": 42}
+      ],
+      "world_conditions": [
+        {"id": "scout_attends", "p": 0.60, "reveal_week": 4, "fail_event": "ev_of_s9_scout"},
+        {"id": "no_academy_signing", "p": 0.60, "reveal_week": 6, "fail_event": "ev_of_s9_academy"},
+        {"id": "club_has_budget", "p": 0.58, "reveal_week": 7, "fail_event": "ev_of_s9_budget"},
+        {"id": "manager_still_there", "p": 0.62, "reveal_week": 8, "fail_event": "ev_of_s9_manager"}
+      ],
+      "success_event": "ev_of_signed_mid",
+      "fail_event_player": "ev_of_s9_not_ready"
+    },
+    {
+      "id": "opp_s11_trial",
+      "season": 11,
+      "window_weeks": [2, 7],
+      "player_conditions": [
+        {"path": "ability", "op": ">=", "value": 51},
+        {"path": "form", "op": ">=", "value": 52},
+        {"path": "injury_weeks_left", "op": "==", "value": 0.0}
+      ],
+      "world_conditions": [
+        {"id": "medical_clears", "p": 0.58, "reveal_week": 3, "fail_event": "ev_of_s11_medical"},
+        {"id": "club_has_budget", "p": 0.58, "reveal_week": 4, "fail_event": "ev_of_s11_budget"},
+        {"id": "no_academy_signing", "p": 0.60, "reveal_week": 5, "fail_event": "ev_of_s11_academy"},
+        {"id": "paperwork_clears", "p": 0.60, "reveal_week": 6, "fail_event": "ev_of_s11_paperwork"}
+      ],
+      "success_event": "ev_of_signed_late",
+      "fail_event_player": "ev_of_s11_not_ready"
+    },
+    {
+      "id": "opp_s13_move",
+      "season": 13,
+      "window_weeks": [3, 8],
+      "notes": "03 §7.5: the last one. Nothing is generated after this and nobody says so.",
+      "player_conditions": [
+        {"path": "ability", "op": ">=", "value": 52},
+        {"path": "form", "op": ">=", "value": 54},
+        {"path": "relationships.npc_agent.trust", "op": ">=", "value": 45}
+      ],
+      "world_conditions": [
+        {"id": "scout_attends", "p": 0.58, "reveal_week": 4, "fail_event": "ev_of_s13_scout"},
+        {"id": "manager_still_there", "p": 0.60, "reveal_week": 5, "fail_event": "ev_of_s13_manager"},
+        {"id": "travel_works", "p": 0.58, "reveal_week": 6, "fail_event": "ev_of_s13_travel"},
+        {"id": "club_has_budget", "p": 0.60, "reveal_week": 7, "fail_event": "ev_of_s13_budget"}
+      ],
+      "success_event": "ev_of_signed_late",
+      "fail_event_player": "ev_of_s13_not_ready"
+    }
+  ]
+}

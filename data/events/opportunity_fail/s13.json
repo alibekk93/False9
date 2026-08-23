@@ -1,0 +1,156 @@
+{
+  "schema": "event",
+  "items": [
+    {
+      "id": "ev_of_s13_scout",
+      "tags": ["opportunity", "phase3"],
+      "scene": {
+        "location": "home_ground",
+        "time_of_day": "afternoon",
+        "body": [
+          "Nobody came. There was no cancellation and no message, and the seat that was described to you stayed empty.",
+          "Ruslan finds out on the Thursday that the man has not worked there since March."
+        ]
+      },
+      "choices": [
+        {
+          "id": "c_ask_ruslan_s13",
+          "text": "Ask Ruslan how that happened.",
+          "effects": [
+            {"type": "relationship", "npc": "npc_agent", "key": "trust", "delta": -6},
+            {"type": "psyche", "key": "stress", "delta": 5}
+          ],
+          "outcome_text": "He is quiet for a second, which is new. He says he should have checked and he does not make anything up."
+        },
+        {
+          "id": "c_let_ruslan_be",
+          "text": "Let it go.",
+          "effects": [{"type": "psyche", "key": "cynicism", "delta": 4}],
+          "outcome_text": "He has eleven other clients and two of them are eighteen. You have known that for years."
+        }
+      ]
+    },
+    {
+      "id": "ev_of_s13_manager",
+      "tags": ["opportunity", "phase3"],
+      "scene": {
+        "location": "office",
+        "time_of_day": "morning",
+        "body": [
+          "The one who knew you from Kalach is gone by the time you get there. He lasted eight games.",
+          "The caretaker has your name on a sheet with nineteen others and is honest that he does not know which of you is which."
+        ]
+      },
+      "choices": [
+        {
+          "id": "c_tell_him_which",
+          "text": "Tell him which one you are.",
+          "effects": [
+            {"type": "psyche", "key": "self_knowledge", "delta": 4},
+            {"type": "psyche", "key": "hope", "delta": 2}
+          ],
+          "outcome_text": "He writes something next to your name. You do not get close enough to see what."
+        },
+        {
+          "id": "c_wait_to_be_asked",
+          "text": "Wait to be asked.",
+          "effects": [{"type": "psyche", "key": "stress", "delta": 5}],
+          "outcome_text": "The session runs long and he is called away before the end of it."
+        }
+      ]
+    },
+    {
+      "id": "ev_of_s13_travel",
+      "tags": ["opportunity", "phase3"],
+      "notes": "08 §8: the death of football beyond the Urals as a travel problem.",
+      "scene": {
+        "location": "bus_station",
+        "time_of_day": "night",
+        "body": [
+          "It is eleven hours each way and the club will not cover it. You can do it once.",
+          "They want to see you three times. There is no version of the arithmetic where three works."
+        ]
+      },
+      "choices": [
+        {
+          "id": "c_go_once",
+          "text": "Go once and hope it is enough.",
+          "effects": [
+            {"type": "money", "delta": -9000},
+            {"type": "psyche", "key": "hope", "delta": 3},
+            {"type": "fatigue", "delta": 8}
+          ],
+          "outcome_text": "You play the eleven hours back over in your head for a week. They wanted three."
+        },
+        {
+          "id": "c_tell_them_no",
+          "text": "Tell them you cannot make the dates.",
+          "effects": [{"type": "psyche", "key": "cynicism", "delta": 5}],
+          "outcome_text": "They are understanding about it. Being understood is not the same as being seen."
+        }
+      ]
+    },
+    {
+      "id": "ev_of_s13_budget",
+      "tags": ["opportunity", "phase3", "money"],
+      "notes": "08 §8: clubs that vanish, and the towns that keep the fixtures anyway.",
+      "scene": {
+        "location": "office",
+        "time_of_day": "afternoon",
+        "body": [
+          "Their sponsor is the plant and the plant has gone to a four-day week.",
+          "They are not signing anybody. They are working out how to finish the season with the squad they have."
+        ]
+      },
+      "choices": [
+        {
+          "id": "c_offer_to_help",
+          "text": "Say you would come for expenses.",
+          "effects": [
+            {"type": "psyche", "key": "stress", "delta": 6},
+            {"type": "psyche", "key": "self_knowledge", "delta": 3}
+          ],
+          "outcome_text": "He says he cannot register anybody at all, at any number, and he shows you why."
+        },
+        {
+          "id": "c_wish_them_luck",
+          "text": "Wish them luck with it.",
+          "effects": [{"type": "psyche", "key": "cynicism", "delta": 3}],
+          "outcome_text": "They finish the season. In the summer the fixture list comes out without them on it."
+        }
+      ]
+    },
+    {
+      "id": "ev_of_s13_not_ready",
+      "tags": ["opportunity", "phase3"],
+      "scene": {
+        "location": "corridor",
+        "time_of_day": "evening",
+        "body": [
+          "Everything held. The scout came, the money was there, the medical passed, the forms went in on time.",
+          "You are twenty-eight and you played the way you play, and it is a level below where they are."
+        ]
+      },
+      "choices": [
+        {
+          "id": "c_ask_for_the_truth",
+          "text": "Ask him to be straight with you.",
+          "effects": [
+            {"type": "psyche", "key": "self_knowledge", "delta": 8},
+            {"type": "psyche", "key": "hope", "delta": -3}
+          ],
+          "outcome_text": "He is. It takes him one sentence and he does not soften it, and you shake his hand for it."
+        },
+        {
+          "id": "c_dont_make_him",
+          "text": "Don't make him say it.",
+          "effects": [
+            {"type": "psyche", "key": "stress", "delta": 3},
+            {"type": "psyche", "key": "self_knowledge", "delta": 2}
+          ],
+          "outcome_text": "He looks relieved. In the car park you sit for a while before you start the engine."
+        }
+      ]
+    }
+  ]
+}

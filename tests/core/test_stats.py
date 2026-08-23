@@ -5,9 +5,10 @@ from dataclasses import replace
 
 import pytest
 
-from false_nine.content import cards
+from false_nine.content import bundle
 from false_nine.core import stats
 from false_nine.core.actions import PlayerAction, step
+from false_nine.core.content import Content
 from false_nine.core.rng import Rng
 from false_nine.core.state import GameState
 from tools.sim import run_career, train_max
@@ -67,13 +68,13 @@ def test_decay_applies_at_the_season_boundary() -> None:
         physical=60.0,
         last_match_week=150,
     )
-    after = step(before, PlayerAction("end_week"), RNG, {}).state
+    after = step(before, PlayerAction("end_week"), RNG, Content()).state
     assert (after.technique, after.physical) == (59.6, 58.8)
 
 
 def test_training_lifts_the_chosen_stat_only() -> None:
     before = GameState(seed="t")
-    after = step(before, PlayerAction("train", "technique"), RNG, {}).state
+    after = step(before, PlayerAction("train", "technique"), RNG, Content()).state
     assert after.technique > before.technique
     assert (after.physical, after.mental) == (before.physical, before.mental)
     assert after.fatigue == 12.0
@@ -85,7 +86,7 @@ def test_training_curve_shape() -> None:
     code clamps him there. See 03 §3.1."""
     finals = [
         run_career(
-            f"curve{i}", train_max, cards.load(), until_week=AGE_26_WEEK
+            f"curve{i}", train_max, bundle.load(), until_week=AGE_26_WEEK
         ).final.ability
         for i in range(40)
     ]

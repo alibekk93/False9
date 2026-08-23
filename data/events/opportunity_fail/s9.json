@@ -1,0 +1,148 @@
+{
+  "schema": "event",
+  "items": [
+    {
+      "id": "ev_of_s9_scout",
+      "tags": ["opportunity", "phase2"],
+      "scene": {
+        "location": "home_ground",
+        "time_of_day": "evening",
+        "body": [
+          "He was in the stand for the first half. At the interval his phone went and he took it standing up.",
+          "He was not there for the second half, which is the half you scored in."
+        ]
+      },
+      "choices": [
+        {
+          "id": "c_ask_if_he_saw",
+          "text": "Ask whether he saw the goal.",
+          "effects": [
+            {"type": "relationship", "npc": "npc_agent", "key": "dependence", "delta": 4},
+            {"type": "psyche", "key": "hope", "delta": 2}
+          ],
+          "outcome_text": "Ruslan says he will send him the clip. The clip is eleven seconds long and has no context in it."
+        },
+        {
+          "id": "c_dont_ask",
+          "text": "Don't ask.",
+          "effects": [{"type": "psyche", "key": "cynicism", "delta": 4}],
+          "outcome_text": "In the changing room somebody says it was a good finish. It was a good finish."
+        }
+      ]
+    },
+    {
+      "id": "ev_of_s9_academy",
+      "tags": ["opportunity", "phase2"],
+      "scene": {
+        "location": "changing_room",
+        "time_of_day": "afternoon",
+        "body": [
+          "They have signed a nineteen-year-old on a three-year deal. The announcement uses the word future twice.",
+          "You are twenty-four. Nothing in the announcement is about you and nothing in it needs to be."
+        ]
+      },
+      "choices": [
+        {
+          "id": "c_congratulate_him",
+          "text": "Send the kid a message.",
+          "effects": [
+            {"type": "psyche", "key": "self_knowledge", "delta": 4},
+            {"type": "psyche", "key": "cynicism", "delta": -2}
+          ],
+          "outcome_text": "He replies with a thumbs up inside a minute. You remember doing that at nineteen."
+        },
+        {
+          "id": "c_close_the_page",
+          "text": "Close the page.",
+          "effects": [{"type": "psyche", "key": "stress", "delta": 5}],
+          "outcome_text": "You open it again that night to check the age and it has not changed."
+        }
+      ]
+    },
+    {
+      "id": "ev_of_s9_budget",
+      "tags": ["opportunity", "phase2", "money"],
+      "notes": "08 §8: the wage ceiling around ₽100,000 and competing on argument.",
+      "scene": {
+        "location": "office",
+        "time_of_day": "morning",
+        "body": [
+          "There is a ceiling on the wage and you are under it. There is also a ceiling on the number of contracts.",
+          "The second one is the one that matters, and nobody put it in writing until August."
+        ]
+      },
+      "choices": [
+        {
+          "id": "c_ask_for_the_number",
+          "text": "Ask what the number is.",
+          "effects": [{"type": "psyche", "key": "self_knowledge", "delta": 3}],
+          "outcome_text": "Twenty-two. They have twenty-two. He turns the screen so you can count them yourself."
+        },
+        {
+          "id": "c_nod",
+          "text": "Nod and go.",
+          "effects": [{"type": "psyche", "key": "cynicism", "delta": 4}],
+          "outcome_text": "He says to keep in touch. He gives you a number that is the club's main line."
+        }
+      ]
+    },
+    {
+      "id": "ev_of_s9_manager",
+      "tags": ["opportunity", "phase2"],
+      "scene": {
+        "location": "corridor",
+        "time_of_day": "evening",
+        "body": [
+          "The man who wanted you has taken a job in the division above with two weeks left of the window.",
+          "He took his assistant and his fitness coach. He did not take a squad list."
+        ]
+      },
+      "choices": [
+        {
+          "id": "c_wish_him_well",
+          "text": "Message him to say well done.",
+          "effects": [
+            {"type": "psyche", "key": "self_knowledge", "delta": 3},
+            {"type": "psyche", "key": "hope", "delta": 2}
+          ],
+          "outcome_text": "He answers in three days and the answer is warm and it is three lines and it is the end of it."
+        },
+        {
+          "id": "c_say_nothing_s9",
+          "text": "Say nothing.",
+          "effects": [{"type": "psyche", "key": "stress", "delta": 5}],
+          "outcome_text": "You watch his first game on a phone in the kitchen. They lose and he looks pleased anyway."
+        }
+      ]
+    },
+    {
+      "id": "ev_of_s9_not_ready",
+      "tags": ["opportunity", "phase2"],
+      "scene": {
+        "location": "away_ground",
+        "time_of_day": "afternoon",
+        "body": [
+          "Two of them came and both of them stayed to the end. There was nothing in the way this time.",
+          "Afterwards one of them tells you what he thinks, kindly, in the tunnel, with his coat already on."
+        ]
+      },
+      "choices": [
+        {
+          "id": "c_ask_how_long",
+          "text": "Ask how far off you are.",
+          "effects": [
+            {"type": "psyche", "key": "self_knowledge", "delta": 6},
+            {"type": "psyche", "key": "hope", "delta": -2}
+          ],
+          "outcome_text": "He thinks about it properly before he answers, which is worse than if he had not."
+        },
+        {
+          "id": "c_thank_them",
+          "text": "Thank them for coming.",
+          "effects": [{"type": "psyche", "key": "stress", "delta": 4}],
+          "outcome_text": "They say it was no trouble. It was four hundred kilometres and they mean it was no trouble."
+        }
+      ]
+    }
+  ]
+}

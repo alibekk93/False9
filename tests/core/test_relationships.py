@@ -4,6 +4,7 @@ from dataclasses import replace
 
 from false_nine.core import relationships
 from false_nine.core.actions import PlayerAction, can_do, end_week, step
+from false_nine.core.content import Content
 from false_nine.core.effects import Change
 from false_nine.core.rng import Rng
 from false_nine.core.state import Bond, GameState
@@ -20,7 +21,7 @@ def weeks(start: GameState, count: int) -> tuple[GameState, list[Change]]:
     """Turn the week over `count` times without spending any AP on the way."""
     effects: list[Change] = []
     for _ in range(count):
-        result = end_week(replace(start, ap=0), RNG)
+        result = end_week(replace(start, ap=0), RNG, Content())
         effects.extend(result.effects)
         start = result.state
     return start, effects
@@ -28,7 +29,7 @@ def weeks(start: GameState, count: int) -> tuple[GameState, list[Change]]:
 
 def test_socialise_moves_closeness_trust_and_stress() -> None:
     before = state(Bond(trust=40.0, closeness=50.0), stress=30.0, week_index=7)
-    after = step(before, PlayerAction("socialise", NPC), RNG, {}).state
+    after = step(before, PlayerAction("socialise", NPC), RNG, Content()).state
     bond = after.relationships[NPC]
 
     assert (bond.closeness, bond.trust) == (56.0, 42.0)
@@ -69,7 +70,7 @@ def test_neglect_repeats_every_eight_weeks_not_every_week() -> None:
 
 def test_contact_resets_the_clock() -> None:
     quiet, _ = weeks(state(Bond(closeness=50.0)), 7)
-    seen = step(quiet, PlayerAction("socialise", NPC), RNG, {}).state
+    seen = step(quiet, PlayerAction("socialise", NPC), RNG, Content()).state
     after, _ = weeks(seen, 7)
     assert after.relationships[NPC].closeness == 56.0  # +6 socialise, no decay
 
@@ -88,5 +89,7 @@ def test_twenty_weeks_of_silence_puts_him_out_of_reach() -> None:
 def test_bonds_survive_a_save_round_trip() -> None:
     from false_nine.core.save import dump, load
 
-    played = step(state(week_index=4), PlayerAction("socialise", NPC), RNG, {}).state
+    played = step(
+        state(week_index=4), PlayerAction("socialise", NPC), RNG, Content()
+    ).state
     assert load(dump(played)) == played

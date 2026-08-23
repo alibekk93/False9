@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from false_nine.content import cards
+from false_nine.content import bundle
 from false_nine.content import npcs as npc_content
 from false_nine.core.actions import PlayerAction, step
 from false_nine.core.rng import Rng
@@ -25,15 +25,26 @@ def replay(seed: str, actions: list[PlayerAction]) -> GameState:
     """A week with a match will not end until it is played, so the fixed action list is
     interleaved with the picks the hand actually offers."""
     rng = Rng(seed)
-    deck = cards.load()
-    state = GameState(seed=seed, relationships=npc_content.starting_bonds())
+    content = bundle.load()
+    state = bundle.new_career(seed)
     for action in actions * 12:
         if state.match_pending:
-            state = step(state, PlayerAction("start_match"), rng, deck).state
+            state = step(state, PlayerAction("start_match"), rng, content).state
             while state.in_match:
                 pick = PlayerAction("play_card", sorted(state.match_hand)[0])
-                state = step(state, pick, rng, deck).state
-        state = step(state, action, rng, deck).state
+                state = step(state, pick, rng, content).state
+        # A scene or a contract blocks the week the way a match does; answering the
+        # first thing offered keeps the fixed action list fixed.
+        while state.pending_events:
+            scene = content.events[state.pending_events[0]]
+            legal = min(c.id for c in scene.choices if c.is_open(state))
+            state = step(
+                state, PlayerAction("resolve_event", legal), rng, content
+            ).state
+        if state.offers:
+            pick = PlayerAction("sign", sorted(state.offers)[0])
+            state = step(state, pick, rng, content).state
+        state = step(state, action, rng, content).state
     return state
 
 
@@ -59,8 +70,8 @@ def test_the_replay_actually_socialised() -> None:
 
 
 def test_a_full_career_is_reproducible() -> None:
-    a = run_career("full", train_max, cards.load())
-    b = run_career("full", train_max, cards.load())
+    a = run_career("full", train_max, bundle.load())
+    b = run_career("full", train_max, bundle.load())
     assert a.final == b.final
     assert a.ratings == b.ratings
 

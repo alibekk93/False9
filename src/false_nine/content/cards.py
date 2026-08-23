@@ -47,7 +47,7 @@ def load() -> dict[str, Card]:
 
 def _card(raw: dict[str, Any], path: Path) -> Card:
     where = f"{path.name}: {raw.get('id', '<no id>')}"
-    _check_keys(raw, CARD_KEYS, where)
+    check_keys(raw, CARD_KEYS, where)
 
     pool = raw["pool"]
     if pool not in POOLS:
@@ -83,7 +83,7 @@ def _card(raw: dict[str, Any], path: Path) -> Card:
 
 
 def _outcome(raw: dict[str, Any], where: str) -> Outcome:
-    _check_keys(raw, OUTCOME_KEYS, where)
+    check_keys(raw, OUTCOME_KEYS, where)
     return Outcome(
         weight=raw["weight"],
         rating_delta=float(raw["rating_delta"]),
@@ -94,7 +94,7 @@ def _outcome(raw: dict[str, Any], where: str) -> Outcome:
     )
 
 
-def _check_keys(raw: dict[str, Any], allowed: frozenset[str], where: str) -> None:
+def check_keys(raw: dict[str, Any], allowed: frozenset[str], where: str) -> None:
     """05: unknown keys are an error, not a warning."""
     unknown = set(raw) - allowed
     if unknown:

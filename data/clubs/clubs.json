@@ -1,0 +1,137 @@
+{
+  "schema": "club",
+  "items": [
+    {
+      "id": "club_zvezda_nizhnegorsk",
+      "name": "Zvezda Nizhnegorsk",
+      "tier": 5,
+      "strength": 28,
+      "facilities": 0.6,
+      "solvency": 45,
+      "town": {"name": "Nizhnegorsk", "population": 350000, "remoteness": 0.4},
+      "wage_offer": 0,
+      "traits": ["home", "academy", "old_pitch"]
+    },
+    {
+      "id": "club_torpedo_vyselki",
+      "name": "Torpedo Vyselki",
+      "tier": 5,
+      "strength": 26,
+      "facilities": 0.5,
+      "solvency": 30,
+      "town": {"name": "Vyselki", "population": 41000, "remoteness": 0.8},
+      "wage_offer": 9000,
+      "traits": ["late_wages", "loyal_crowd"]
+    },
+    {
+      "id": "club_stroitel_kamyshovo",
+      "name": "Stroitel Kamyshovo",
+      "tier": 5,
+      "strength": 31,
+      "facilities": 0.55,
+      "solvency": 35,
+      "town": {"name": "Kamyshovo", "population": 58000, "remoteness": 0.7},
+      "wage_offer": 14000,
+      "traits": ["late_wages", "bus_travel"]
+    },
+    {
+      "id": "club_zarya_borisoglebsk",
+      "name": "Zarya Borisoglebsk",
+      "tier": 4,
+      "strength": 38,
+      "facilities": 0.6,
+      "solvency": 35,
+      "town": {"name": "Borisoglebsk", "population": 60000, "remoteness": 0.7},
+      "wage_offer": 45000,
+      "traits": ["late_wages", "old_pitch", "loyal_crowd"]
+    },
+    {
+      "id": "club_metallurg_kalach",
+      "name": "Metallurg Kalach",
+      "tier": 4,
+      "strength": 41,
+      "facilities": 0.7,
+      "solvency": 48,
+      "town": {"name": "Kalach", "population": 82000, "remoteness": 0.55},
+      "wage_offer": 52000,
+      "traits": ["plant_owned", "bus_travel"]
+    },
+    {
+      "id": "club_vympel_severny",
+      "name": "Vympel Severny",
+      "tier": 4,
+      "strength": 36,
+      "facilities": 0.65,
+      "solvency": 30,
+      "town": {"name": "Severny", "population": 47000, "remoteness": 0.9},
+      "wage_offer": 41000,
+      "traits": ["late_wages", "long_winter"]
+    },
+    {
+      "id": "club_dinamo_orlovka",
+      "name": "Dinamo Orlovka",
+      "tier": 3,
+      "strength": 50,
+      "facilities": 0.85,
+      "solvency": 62,
+      "town": {"name": "Orlovka", "population": 190000, "remoteness": 0.45},
+      "wage_offer": 95000,
+      "traits": ["settled", "loyal_crowd"]
+    },
+    {
+      "id": "club_sever_tobolskaya",
+      "name": "Sever Tobolskaya",
+      "tier": 3,
+      "strength": 47,
+      "facilities": 0.8,
+      "solvency": 55,
+      "town": {"name": "Tobolskaya", "population": 120000, "remoteness": 0.95},
+      "wage_offer": 88000,
+      "traits": ["bus_travel", "long_winter"]
+    },
+    {
+      "id": "club_start_kamensk",
+      "name": "Start Kamensk",
+      "tier": 3,
+      "strength": 53,
+      "facilities": 0.9,
+      "solvency": 68,
+      "town": {"name": "Kamensk", "population": 210000, "remoteness": 0.35},
+      "wage_offer": 108000,
+      "traits": ["settled", "new_gym"]
+    },
+    {
+      "id": "club_avangard_pskovsky",
+      "name": "Avangard Pskovsky",
+      "tier": 2,
+      "strength": 64,
+      "facilities": 1.05,
+      "solvency": 74,
+      "town": {"name": "Pskovsky", "population": 400000, "remoteness": 0.3},
+      "wage_offer": 178000,
+      "traits": ["settled", "new_gym", "loyal_crowd"]
+    },
+    {
+      "id": "club_uralets_zlatograd",
+      "name": "Uralets Zlatograd",
+      "tier": 2,
+      "strength": 67,
+      "facilities": 1.15,
+      "solvency": 70,
+      "town": {"name": "Zlatograd", "population": 430000, "remoteness": 0.6},
+      "wage_offer": 185000,
+      "traits": ["new_gym", "long_winter"]
+    },
+    {
+      "id": "club_neftyanik_surgutskoye",
+      "name": "Neftyanik Surgutskoye",
+      "tier": 2,
+      "strength": 62,
+      "facilities": 1.0,
+      "solvency": 80,
+      "town": {"name": "Surgutskoye", "population": 380000, "remoteness": 0.85},
+      "wage_offer": 172000,
+      "traits": ["settled", "long_winter", "plant_owned"]
+    }
+  ]
+}

@@ -6,10 +6,12 @@ import time
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass, field
 
-from false_nine.content import cards as card_content
-from false_nine.content import npcs as npc_content
+from false_nine.content import bundle
 from false_nine.core.actions import TRAINABLE, PlayerAction, can_do, step
 from false_nine.core.calendar import CAREER_WEEKS
+from false_nine.core.club import Club
+from false_nine.core.content import Content
+from false_nine.core.events.event import Event
 from false_nine.core.match.card import Card
 from false_nine.core.resources import BASE_AP, FATIGUE_TRAIN
 from false_nine.core.rng import Rng
@@ -23,6 +25,10 @@ Policy = Callable[[GameState], PlayerAction]
 
 TRAIN_THRESHOLD = 50.0
 WORK_UNTIL = 30_000
+AGENT = "npc_agent"
+# Far enough to clear the trust gate on the last chance, and no further: `careerist`
+# is meant to be a plausible player, not one who optimises a number he cannot see.
+AGENT_TRUST_TARGET = 50.0
 # The two contrast policies below train only up to this fatigue, which leaves them
 # spare AP to spend differently. 50 would leave none. See `quiet` and `social`.
 STUDY_THRESHOLD = 30.0
@@ -40,6 +46,23 @@ def balanced(state: GameState) -> PlayerAction:
     """Keeps the lights on, then trains. Closer to how the game is actually played."""
     if state.money < WORK_UNTIL:
         return PlayerAction("work")
+    return train_max(state)
+
+
+def careerist(state: GameState) -> PlayerAction:
+    """`train_max`, plus answering the phone to his agent. The M4 anchor.
+
+    03 §7.2 quotes its 8-15% for "a well-prepared player", so the conversion rate has
+    to be measured against one. `train_max` is not: he never speaks to Ruslan, and
+    three of the six chances gate him out on agent trust before the world gets a say.
+    A chance he was never eligible for is not a chance the world took off him, and
+    measuring the ceiling against him would flatter it.
+
+    Paired with `train_max` the way `social` is paired with `quiet`: identical
+    training under the same fatigue cap, differing only in who he calls."""
+    bond = state.relationships.get(AGENT)
+    if bond is not None and bond.trust < AGENT_TRUST_TARGET and state.fatigue > 0:
+        return PlayerAction("socialise", AGENT)
     return train_max(state)
 
 
@@ -77,6 +100,7 @@ def _train_weakest(state: GameState) -> PlayerAction:
 POLICIES: dict[str, Policy] = {
     "train_max": train_max,
     "balanced": balanced,
+    "careerist": careerist,
     "broke": broke,
     "quiet": quiet,
     "social": social,
@@ -93,11 +117,23 @@ class Career:
     squeezed_weeks: int = 0  # weeks that opened below 4 AP — fatigue or stress bit
     dealt: int = 0  # cards dealt across every hand
     polluted: int = 0  # of those, cards that came out of a pollution pool
+    tier_at_26: int = 0
+    unpaid_paydays: int = 0  # paydays that came up short, 03 §6.2
+    clubless_weeks: int = 0
 
     @property
     def pollution_rate(self) -> float:
         """What share of the hands he was dealt were the week talking. 03 §5.3."""
         return self.polluted / self.dealt if self.dealt else 0.0
+
+    @property
+    def converted(self) -> int:
+        return self.final.opportunities_converted
+
+    @property
+    def failure_scenes(self) -> tuple[str, ...]:
+        """09 M4: no career may see the same one twice."""
+        return self.final.failure_scenes_seen
 
 
 def best_card(state: GameState, cards: Mapping[str, Card]) -> str:
@@ -111,24 +147,44 @@ def _expected(card: Card) -> float:
     return sum(o.weight * o.rating_delta for o in card.outcomes) / 100.0
 
 
+def first_choice(state: GameState, event: Event) -> str:
+    """A policy's answer to a scene: the first one the state leaves open, ties on id.
+    Dull on purpose — a scene should not be where the balance numbers come from."""
+    return min(c.id for c in event.choices if c.is_open(state))
+
+
+def best_offer(state: GameState, clubs: Mapping[str, Club]) -> str:
+    """Takes the money. Ties on id so the pick does not depend on offer order."""
+    return max(state.offers, key=lambda club_id: (clubs[club_id].wage_offer, club_id))
+
+
 def run_career(
     seed: str,
     policy: Policy,
-    cards: Mapping[str, Card],
+    content: Content,
     until_week: int = CAREER_WEEKS + 1,
 ) -> Career:
     rng = Rng(seed)
-    state = GameState(seed=seed, relationships=npc_content.starting_bonds())
+    state = bundle.new_career(seed)
+    cards = content.cards
     career = Career()
 
     while state.week_index < until_week:
         if state.week_index == AGE_26_WEEK and not career.ability_at_26:
             career.ability_at_26 = state.ability
+            career.tier_at_26 = state.tier
 
+        # Matches, scenes and contracts are not AP; they are the week happening to him,
+        # and the harness answers them so a policy only ever decides how to spend a day.
         if state.in_match:
             action = PlayerAction("play_card", best_card(state, cards))
         elif state.match_pending:
             action = PlayerAction("start_match")
+        elif state.pending_events:
+            event = content.events[state.pending_events[0]]
+            action = PlayerAction("resolve_event", first_choice(state, event))
+        elif state.offers:
+            action = PlayerAction("sign", best_offer(state, content.clubs))
         elif state.ap > 0:
             action = policy(state)
         else:
@@ -137,8 +193,8 @@ def run_career(
         if not can_do(state, action):
             action = PlayerAction("drift" if state.ap > 0 else "end_week")
 
-        played, week = state.last_match_week, state.week_index
-        state = step(state, action, rng, cards).state
+        played, week, owed = state.last_match_week, state.week_index, state.arrears
+        state = step(state, action, rng, content).state
         if action.kind == "start_match":
             career.dealt += len(state.match_hand)
             career.polluted += sum(
@@ -147,8 +203,12 @@ def run_career(
             )
         if state.last_match_week != played:
             career.ratings.append(state.last_match_rating)
-        if state.week_index != week and state.ap < BASE_AP:
-            career.squeezed_weeks += 1
+        if state.arrears > owed:
+            career.unpaid_paydays += 1
+        if state.week_index != week:
+            career.clubless_weeks += not state.is_employed
+            if state.ap < BASE_AP:
+                career.squeezed_weeks += 1
 
     career.final = state
     return career
@@ -179,7 +239,15 @@ def report(careers: list[Career], strategy: str, elapsed_s: float) -> str:
         "weeks under 4 AP": [float(c.squeezed_weeks) for c in careers],
         "stress": [c.final.stress for c in careers],
         "hope": [c.final.hope for c in careers],
+        "cynicism": [c.final.cynicism for c in careers],
         "pollution in hand": [c.pollution_rate for c in careers],
+        "division at 26": [float(c.tier_at_26) for c in careers],
+        "division final": [float(c.final.tier) for c in careers],
+        "chances converted": [float(c.converted) for c in careers],
+        "chances seen": [float(len(c.failure_scenes) + c.converted) for c in careers],
+        "unpaid paydays": [float(c.unpaid_paydays) for c in careers],
+        "weeks without a club": [float(c.clubless_weeks) for c in careers],
+        "arrears owed": [float(c.final.arrears) for c in careers],
     }
 
     header = " | ".join(f"p{p}".rjust(9) for p in PERCENTILES)
@@ -204,12 +272,13 @@ def main(argv: Sequence[str] | None = None) -> None:
     parser.add_argument("--report", help="write the table here instead of stdout")
     args = parser.parse_args(argv)
 
-    cards = card_content.load()
+    content = bundle.load()
     policy = POLICIES[args.strategy]
 
     start = time.perf_counter()
     careers = [
-        run_career(f"{args.seed_prefix}{i}", policy, cards) for i in range(args.careers)
+        run_career(f"{args.seed_prefix}{i}", policy, content)
+        for i in range(args.careers)
     ]
     elapsed_s = time.perf_counter() - start
 

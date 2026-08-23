@@ -5,6 +5,7 @@ from dataclasses import replace
 from false_nine.content import cards as card_content
 from false_nine.core import psyche
 from false_nine.core.actions import PlayerAction, end_week, step
+from false_nine.core.content import Content
 from false_nine.core.rng import Rng
 from false_nine.core.state import Bond, GameState
 
@@ -22,7 +23,7 @@ def test_hope_leaks_from_season_five() -> None:
 
     def hope_after(week_index: int) -> float:
         state = GameState(seed="t", week_index=week_index, ap=0)
-        return end_week(state, Rng("t")).state.hope
+        return end_week(state, Rng("t"), Content()).state.hope
 
     assert hope_after(40) == psyche.HOPE_START  # season 4 ends, nothing leaks
     assert hope_after(45) == psyche.HOPE_START  # mid-season, nothing leaks
@@ -38,18 +39,22 @@ def test_psyche_does_not_touch_stats() -> None:
         base = GameState(
             seed="t", week_index=week_index, technique=technique, fatigue=fatigue
         )
-        trained = step(base, TRAIN, Rng("t"), {}).state.technique
-        decayed = end_week(replace(base, week_index=week_index + 9, ap=0), Rng("t"))
+        trained = step(base, TRAIN, Rng("t"), Content()).state.technique
+        decayed = end_week(
+            replace(base, week_index=week_index + 9, ap=0), Rng("t"), Content()
+        )
 
         for name in PSYCHE_FIELDS:
             for value in EXTREMES:
                 skewed = replace(base, **{name: value})
-                assert step(skewed, TRAIN, Rng("t"), {}).state.technique == trained, (
-                    f"{name}={value} changed what training is worth"
-                )
+                assert (
+                    step(skewed, TRAIN, Rng("t"), Content()).state.technique == trained
+                ), f"{name}={value} changed what training is worth"
 
                 aged = end_week(
-                    replace(skewed, week_index=week_index + 9, ap=0), Rng("t")
+                    replace(skewed, week_index=week_index + 9, ap=0),
+                    Rng("t"),
+                    Content(),
                 )
                 assert aged.state.technique == decayed.state.technique, name
                 assert aged.state.physical == decayed.state.physical, name
@@ -90,9 +95,9 @@ def test_relationships_do_not_affect_match() -> None:
 
 def _play_a_match(state: GameState, cards: dict[str, object]) -> GameState:
     rng = Rng(state.seed)
-    state = step(state, PlayerAction("start_match"), rng, cards).state
+    state = step(state, PlayerAction("start_match"), rng, Content(cards=cards)).state
     assert state.in_match, "the fixture stopped landing on a match week"
     while state.in_match:
         pick = PlayerAction("play_card", sorted(state.match_hand)[0])
-        state = step(state, pick, rng, cards).state
+        state = step(state, pick, rng, Content(cards=cards)).state
     return state

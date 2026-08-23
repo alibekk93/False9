@@ -6,6 +6,11 @@ CAREER_WEEKS = SEASONS * WEEKS_PER_SEASON
 
 MATCH_WEEKS = frozenset({2, 3, 5, 6, 8, 9, 10})
 
+# 03 §1 phase boundaries. Phase 1 is also how long his first contract runs: 02 ends the
+# academy years with a placement, so the deal he starts on expires exactly there.
+PHASE_1_SEASONS = 3
+PHASE_2_SEASONS = 10
+
 
 def season_of(week_index: int) -> int:
     return (week_index - 1) // WEEKS_PER_SEASON + 1
@@ -22,9 +27,9 @@ def age_of(week_index: int) -> int:
 
 def phase_of(week_index: int) -> int:
     season = season_of(week_index)
-    if season <= 3:
+    if season <= PHASE_1_SEASONS:
         return 1
-    if season <= 10:
+    if season <= PHASE_2_SEASONS:
         return 2
     return 3
 

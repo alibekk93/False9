@@ -2,16 +2,15 @@ from __future__ import annotations
 
 from uuid import uuid4
 
-from false_nine.content import npcs as npc_content
-from false_nine.core.state import GameState
+from false_nine.content import bundle
 from false_nine.ui.app import App
 from false_nine.ui.screens.week import WeekScreen
 
 
 def main() -> None:
-    # No title or new-career screen yet (M4): a career starts on launch.
+    # No title or new-career screen yet: 09 puts the shell at M8, and a career that
+    # starts on launch is the fastest way to look at the week.
     app = App()
-    seed = uuid4().hex[:8]
-    state = GameState(seed=seed, relationships=npc_content.starting_bonds())
+    state = bundle.new_career(uuid4().hex[:8])
     app.push(WeekScreen(app, state))
     app.run()

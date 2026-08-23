@@ -1,18 +1,31 @@
 from __future__ import annotations
 
-from collections.abc import Mapping
 from dataclasses import dataclass, replace
 
-from false_nine.core import calendar, psyche, relationships, resources, stats
+from false_nine.core import (
+    calendar,
+    club,
+    opportunity,
+    psyche,
+    relationships,
+    resources,
+    stats,
+)
+from false_nine.core.content import Content
 from false_nine.core.effects import Change, update
+from false_nine.core.events import apply as event_effects
 from false_nine.core.match import play
-from false_nine.core.match.card import Card, Outcome
+from false_nine.core.match.card import Outcome
 from false_nine.core.rng import Rng
 from false_nine.core.state import GameState, advance_week
 
 TRAINABLE = ("technique", "physical", "mental")
 # A match costs no AP: 03 §2.1 lists six actions and playing is not one of them.
-FREE_ACTIONS = frozenset({"drift", "end_week", "start_match", "play_card"})
+# Neither does answering a scene or signing a contract; those are the week happening
+# to him, not something he spends the week on.
+FREE_ACTIONS = frozenset(
+    {"drift", "end_week", "start_match", "play_card", "resolve_event", "sign"}
+)
 BEATS_PER_MATCH = 3
 
 
@@ -35,12 +48,24 @@ class StepResult:
 
 def can_do(state: GameState, action: PlayerAction) -> bool:
     if action.kind == "end_week":
-        # A match he is due to play blocks the week from ending, the way it would.
-        return state.ap == 0 and not state.match_pending
+        # A match he is due to play blocks the week from ending, the way it would, and
+        # so do a scene he has not answered and a contract he has not signed.
+        return (
+            state.ap == 0
+            and not state.match_pending
+            and not state.pending_events
+            and not state.offers
+        )
     if action.kind == "start_match":
         return state.match_pending and not state.in_match
     if action.kind == "play_card":
         return state.in_match and action.arg in state.match_hand
+    if action.kind == "resolve_event":
+        # Which choices are open needs the authored `requires`, which lives in
+        # `data/`; `step` checks that and no-ops on a choice that is not.
+        return bool(state.pending_events)
+    if action.kind == "sign":
+        return action.arg in state.offers
     if state.ap <= 0:
         return False
     if action.kind == "train":
@@ -54,26 +79,38 @@ def can_do(state: GameState, action: PlayerAction) -> bool:
 
 
 def step(
-    state: GameState, action: PlayerAction, rng: Rng, cards: Mapping[str, Card]
+    state: GameState, action: PlayerAction, rng: Rng, content: Content
 ) -> StepResult:
     if action.kind == "end_week":
-        return end_week(state, rng) if can_do(state, action) else StepResult(state, [])
+        if not can_do(state, action):
+            return StepResult(state, [])
+        return end_week(state, rng, content)
     if not can_do(state, action):
         return StepResult(state, [])
 
     effects: list[Change] = []
     if action.kind == "start_match":
-        return StepResult(play.start(state, cards, rng), effects)
+        return StepResult(play.start(state, content.cards, rng), effects)
     if action.kind == "play_card":
         assert action.arg is not None  # can_do checked membership in the hand
-        state, outcome = play.play_card(state, cards, action.arg, rng, effects)
+        state, outcome = play.play_card(state, content.cards, action.arg, rng, effects)
         if state.beat > BEATS_PER_MATCH:
-            state = play.finish(state, rng, effects)
+            state = play.finish(
+                state, rng, effects, club.strength(state, content.clubs)
+            )
         return StepResult(state, effects, outcome)
+    if action.kind == "resolve_event":
+        assert action.arg is not None
+        return StepResult(_resolve_event(state, action.arg, content, effects), effects)
+    if action.kind == "sign":
+        assert action.arg is not None  # can_do checked membership in the offers
+        return StepResult(club.sign(state, content.clubs[action.arg], effects), effects)
 
     if action.kind == "train":
         assert action.arg is not None  # can_do checked membership in TRAINABLE
-        state = _train(state, action.arg, rng, effects)
+        state = _train(
+            state, action.arg, rng, effects, club.facilities(state, content.clubs)
+        )
     elif action.kind == "recover":
         state = _recover(state, effects)
     elif action.kind == "work":
@@ -90,7 +127,7 @@ def step(
     return StepResult(replace(state, ap=state.ap - spent), effects)
 
 
-def end_week(state: GameState, rng: Rng) -> StepResult:
+def end_week(state: GameState, rng: Rng, content: Content) -> StepResult:
     effects: list[Change] = []
 
     state = update(
@@ -100,6 +137,8 @@ def end_week(state: GameState, rng: Rng) -> StepResult:
         fatigue=resources.clamp01_100(state.fatigue + resources.FATIGUE_PASSIVE),
         injury_weeks_left=max(0.0, state.injury_weeks_left - 1.0),
     )
+    if state.week in club.PAYDAY_WEEKS:
+        state = club.payday(state, rng.stream("wages", state.week_index), effects)
     state = update(
         state,
         effects,
@@ -120,6 +159,11 @@ def end_week(state: GameState, rng: Rng) -> StepResult:
         )
         state = replace(state, money=0)
     state = relationships.decay(state, effects)
+    state = _opportunity(state, rng, content, effects)
+    state = club.drift_solvency(state, content.clubs)
+    if club.has_folded(state):
+        state = _queue(club.fold(state, effects), club.FOLD_EVENT, content)
+
     if state.week == calendar.WEEKS_PER_SEASON:
         technique_loss, physical_loss = stats.season_decay(state.age)
         state = update(
@@ -129,10 +173,65 @@ def end_week(state: GameState, rng: Rng) -> StepResult:
             technique=_floored(state.technique - technique_loss),
             physical=_floored(state.physical - physical_loss),
             hope=resources.clamp01_100(state.hope + psyche.season_drift(state.season)),
+            cynicism=resources.clamp01_100(
+                state.cynicism
+                + (
+                    relationships.CYNICISM_WARMTH_SEASON
+                    if relationships.is_warm(state)
+                    else 0.0
+                )
+            ),
         )
+        state = club.season_end(state, rng.stream("wages", state.week_index), effects)
+        if (
+            state.contract_seasons_left == 0
+            and state.week_index < calendar.CAREER_WEEKS
+        ):
+            offers = club.offers(
+                state, content.clubs, rng.stream("offers", state.week_index)
+            )
+            state = replace(state, offers=offers)
 
     state = advance_week(state)
     return StepResult(replace(state, ap=resources.ap_for_week(state)), effects)
+
+
+def _opportunity(
+    state: GameState, rng: Rng, content: Content, effects: list[Change]
+) -> GameState:
+    """03 §7. One arc at a time: it opens on its window's first week, tells him what
+    has gone wrong as each condition reaches its reveal week, and settles at the end
+    of the window if it is still alive by then."""
+    arc = content.opportunities.get(state.opportunity_id)
+    if arc is None:
+        arc = opportunity.due(state, content.opportunities)
+        if arc is None:
+            return state
+        state = opportunity.activate(state, arc, rng)
+
+    state = opportunity.reveal(state, arc, effects)
+    if state.opportunity_id == arc.id and state.week >= arc.window_weeks[1]:
+        state = opportunity.resolve(state, arc, effects)
+    return state
+
+
+def _resolve_event(
+    state: GameState, choice_id: str, content: Content, effects: list[Change]
+) -> GameState:
+    event = content.events[state.pending_events[0]]
+    chosen = next((c for c in event.choices if c.id == choice_id), None)
+    if chosen is None or not chosen.is_open(state):
+        return state
+    state = replace(state, pending_events=state.pending_events[1:])
+    return event_effects.apply(state, effects, "reason_event", chosen.effects)
+
+
+def _queue(state: GameState, event_id: str, content: Content) -> GameState:
+    """A scene with nothing authored behind it is skipped rather than crashing the
+    week. The content test is what says it is missing."""
+    if event_id not in content.events:
+        return state
+    return replace(state, pending_events=(*state.pending_events, event_id))
 
 
 def _floored(stat: float) -> float:
@@ -140,8 +239,12 @@ def _floored(stat: float) -> float:
     return max(stats.STAT_FLOOR, stat)
 
 
-def _train(state: GameState, stat: str, rng: Rng, effects: list[Change]) -> GameState:
-    gain = stats.training_gain(getattr(state, stat), state.age, state.fatigue)
+def _train(
+    state: GameState, stat: str, rng: Rng, effects: list[Change], facilities: float
+) -> GameState:
+    gain = stats.training_gain(
+        getattr(state, stat), state.age, state.fatigue, facilities
+    )
     state = update(
         state,
         effects,

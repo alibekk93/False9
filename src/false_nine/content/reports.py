@@ -8,7 +8,9 @@ from false_nine.content.strings import DATA
 from false_nine.core.rng import Stream
 
 # [TUNE] Rating band edges. The report describes his performance and never the team's
-# result — 03 §5.4. Team results arrive with clubs at M4.
+# result — 03 §5.4. M4 gave the week a team result and the bands did not change: the
+# result is stated on the screen and selects nothing here, because the game does not
+# congratulate him for a win he was carried to.
 BANDS = (("poor", 4.5), ("flat", 5.5), ("decent", 7.0), ("good", 11.0))
 
 

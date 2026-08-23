@@ -1,0 +1,103 @@
+{
+  "schema": "event",
+  "items": [
+    {
+      "id": "ev_of_signed_early",
+      "tags": ["opportunity", "success"],
+      "notes": "03 §7.4: one tier, to a club that is itself precarious. Nothing here celebrates.",
+      "scene": {
+        "location": "office",
+        "time_of_day": "afternoon",
+        "body": [
+          "It is two sheets of paper and a pen that belongs to the club.",
+          "The division is one above the one you are in. The town is smaller than the one you are in.",
+          "The man says welcome and then asks whether you can start on the Monday, because they are short."
+        ]
+      },
+      "choices": [
+        {
+          "id": "c_start_monday",
+          "text": "Say you can start Monday.",
+          "effects": [
+            {"type": "psyche", "key": "hope", "delta": 4},
+            {"type": "relationship", "npc": "npc_coach", "key": "respect", "delta": 5}
+          ],
+          "outcome_text": "You can. There is nothing at home that Monday was for."
+        },
+        {
+          "id": "c_call_your_mother",
+          "text": "Ask for a minute and call your mother.",
+          "effects": [
+            {"type": "relationship", "npc": "npc_mother", "key": "closeness", "delta": 8},
+            {"type": "psyche", "key": "self_knowledge", "delta": 3}
+          ],
+          "outcome_text": "She is on a shift. She says that is wonderful and asks whether they will feed you properly."
+        }
+      ]
+    },
+    {
+      "id": "ev_of_signed_mid",
+      "tags": ["opportunity", "success"],
+      "scene": {
+        "location": "office",
+        "time_of_day": "morning",
+        "body": [
+          "The terms are better than the last ones and they are not what you imagined terms would be at twenty-three.",
+          "There is a clause about appearances that you read twice. It is fair. It is also a number you would have to be first choice to reach."
+        ]
+      },
+      "choices": [
+        {
+          "id": "c_ask_about_the_clause",
+          "text": "Ask what the clause means in practice.",
+          "effects": [
+            {"type": "psyche", "key": "self_knowledge", "delta": 5},
+            {"type": "relationship", "npc": "npc_agent", "key": "respect", "delta": 4}
+          ],
+          "outcome_text": "It means twenty-two starts. Last season the man ahead of you made twenty-six."
+        },
+        {
+          "id": "c_sign_it",
+          "text": "Sign it.",
+          "effects": [
+            {"type": "psyche", "key": "hope", "delta": 5},
+            {"type": "psyche", "key": "stress", "delta": -4}
+          ],
+          "outcome_text": "The pen is out of ink halfway through your surname and he finds you another one."
+        }
+      ]
+    },
+    {
+      "id": "ev_of_signed_late",
+      "tags": ["opportunity", "success"],
+      "scene": {
+        "location": "office",
+        "time_of_day": "afternoon",
+        "body": [
+          "They want you for what you know, and they say so, and it is the first time anybody has put it that way.",
+          "The contract is short. The wage is the highest you have been offered and the length is the shortest."
+        ]
+      },
+      "choices": [
+        {
+          "id": "c_take_it",
+          "text": "Take it.",
+          "effects": [
+            {"type": "psyche", "key": "hope", "delta": 4},
+            {"type": "psyche", "key": "self_knowledge", "delta": 4}
+          ],
+          "outcome_text": "In the changing room the youngest of them calls you by your surname and a patronymic he has guessed."
+        },
+        {
+          "id": "c_ask_for_two_years",
+          "text": "Ask for two years.",
+          "effects": [
+            {"type": "psyche", "key": "stress", "delta": 5},
+            {"type": "psyche", "key": "self_knowledge", "delta": 5}
+          ],
+          "outcome_text": "He says he would if it were his to give. He does not pretend the answer might change."
+        }
+      ]
+    }
+  ]
+}

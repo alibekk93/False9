@@ -93,8 +93,16 @@ uv run python -m tools.sim --careers 1000 --strategy neglectful
 uv run python -m tools.sim --careers 1000 --strategy random --seed 42
 ```
 
-Strategies are scripted AP policies: `optimal` (maximise ability), `neglectful` (train
-only, never socialise), `balanced`, `random`, `broke` (always Work).
+Strategies are scripted AP policies: `train_max` (the ceiling anchor of `03` §3.1),
+`careerist` (the same training plus keeping his agent warm — the "well-prepared player"
+`03` §7.2 quotes its conversion rate for), `balanced`, `broke` (always Work), and the
+matched pair `quiet` / `social`.
+
+Two of them are anchors and the difference matters. `train_max` is who the **ability**
+ceiling is measured against, because he climbs fastest. He is the wrong anchor for the
+**opportunity** rate: he never speaks to Ruslan, so three of the six chances gate him
+out before the world gets a say, and a chance he was never eligible for is not one the
+world took off him. `careerist` is the anchor for `03` §7.
 
 Reports: ability curve percentiles, money and debt distributions, injury counts, matches
 played, opportunities converted, ending distribution, weeks with 0 AP available.

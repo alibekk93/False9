@@ -14,19 +14,25 @@ ROW = 28
 REVEAL_MS = 90  # 06: watching the damage arrive one line at a time is the feeling
 MINUS = "−"  # U+2212, so a loss reads the same in the value and the delta columns
 
-MONEY_FIELDS = frozenset({"money", "debt"})
+MONEY_FIELDS = frozenset({"money", "debt", "arrears", "contract_wage"})
 # 07 §4: shown as a direction, never a number.
 PSYCHE_FIELDS = frozenset({"stress", "hope", "cynicism", "self_knowledge"})
-WHOLE_FIELDS = frozenset({"injury_weeks_left", "injury_history"})
+WHOLE_FIELDS = frozenset(
+    {"injury_weeks_left", "injury_history", "contract_seasons_left", "tier"}
+)
 LOWER_IS_BETTER = frozenset(
     {
         "debt",
+        "arrears",
         "fatigue",
         "stress",
         "cynicism",
         "dependence",
         "injury_weeks_left",
         "injury_history",
+        # A smaller number is a higher division. The one row on this screen where
+        # down is up, which is why it is named here rather than inferred.
+        "tier",
     }
 )
 

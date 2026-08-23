@@ -72,10 +72,19 @@ visibly different hands. This is the design's central claim; verify it here.
 
 The most important milestone in the project. Read `03` §7 in full before starting.
 
-**Acceptance**: 1000 careers → mean opportunities converted between 0.5 and 1.5; no career
-converts more than 2; no career sees the same failure scene twice; every world condition
-in `data/` has a distinct authored failure event. `test_no_hidden_ceiling` greps `core/`
-for stat clamps and hardcoded ability limits and fails on any hit.
+**Acceptance**: 1000 careers → mean opportunities converted between 0.5 and 1.5; **never
+more than 3, and more than 2 in under 5% of careers**; no career sees the same failure
+scene twice; every world condition in `data/` has a distinct authored failure event.
+`test_no_hidden_ceiling` greps `core/` for stat clamps and hardcoded ability limits and
+fails on any hit.
+
+**Amended at M4, and the reason matters.** This originally read "no career converts more
+than 2". It cannot: `03` §7.4 puts the ceiling at tier 2 and a career starts at tier 5,
+so the ladder is three rungs and an honest model climbs all three sometimes. Capping the
+count in code would be precisely the invisible flag §7.1 forbids, so the number moved
+instead. Measured against `tools.sim.careerist` over 1000 careers: **mean 0.65**,
+distribution `{0: 501, 1: 367, 2: 113, 3: 19}` — **1.9%** above two, and every one of
+those 19 sitting at exactly the tier §7.4 names as the best the game can produce.
 
 ---
 
